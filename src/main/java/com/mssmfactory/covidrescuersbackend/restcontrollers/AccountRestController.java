@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("account")
@@ -25,6 +26,16 @@ public class AccountRestController {
     @GetMapping("findAll")
     public List<Account> findAll() {
         return this.accountRepository.findAll();
+    }
+
+    @GetMapping("findByPhoneNumber")
+    public Account findByPhoneNumber(@RequestParam("phoneNumber") String phoneNumber) {
+        Optional<Account> accountOptional = this.accountRepository.findByPhoneNumber(phoneNumber);
+
+        if (accountOptional.isPresent())
+            return accountOptional.get();
+
+        return null;
     }
 
     @PatchMapping("updateAccountState/{accountId}")

@@ -68,14 +68,6 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // --------------------------------------------------------------
 
-                .antMatchers("/city/findAll", "/town/findAll")
-                .permitAll()
-
-                .antMatchers(HttpMethod.POST, "/account")
-                .permitAll()
-
-                // --------------------------------------------------------------
-
                 .antMatchers("/swagger-ui.html**")
                 .hasRole("ADMIN_ROLE")
 

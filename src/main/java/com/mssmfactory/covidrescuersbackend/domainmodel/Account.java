@@ -21,7 +21,7 @@ public class Account {
     private String firstName, famillyName, phoneNumber;
 
     @NotNull
-    private Integer cityId, townId;
+    private Integer cityId, townId, numberOfMeetings;
 
     @NotNull
     private AccountState accountState;

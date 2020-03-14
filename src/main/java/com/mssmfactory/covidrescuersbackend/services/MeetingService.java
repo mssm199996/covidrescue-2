@@ -7,7 +7,6 @@ import com.mssmfactory.covidrescuersbackend.dto.MeetingRequest;
 import com.mssmfactory.covidrescuersbackend.exceptions.NoSuchAccountException;
 import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.MeetingRepository;
-import com.mssmfactory.covidrescuersbackend.repositories.SequenceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,18 +34,24 @@ public class MeetingService {
             Optional<Account> targetedAccount = this.accountRepository.findByPhoneNumber(meetingRequest.getTargetAccountPhoneNumber());
 
             if (targetedAccount.isPresent()) {
+                Account triggerer = triggererAccount.get();
+                Account targeted = targetedAccount.get();
+
                 Meeting meeting = new Meeting();
                 meeting.setId(this.sequenceService.getNextValue(Meeting.SEQUENCE_ID));
                 meeting.setLatitude(meetingRequest.getLatitude());
                 meeting.setLocalDateTime(LocalDateTime.now());
                 meeting.setLongitude(meetingRequest.getLongitude());
-                meeting.setTargetAccountId(targetedAccount.get().getId());
-                meeting.setTriggererAccountId(triggererAccount.get().getId());
-                meeting.setTriggererAccountState(triggererAccount.get().getAccountState());
-                meeting.setTargetAccountState(targetedAccount.get().getAccountState());
+                meeting.setTargetAccountId(targeted.getId());
+                meeting.setTriggererAccountId(triggerer.getId());
+                meeting.setTriggererAccountState(triggerer.getAccountState());
+                meeting.setTargetAccountState(targeted.getAccountState());
 
                 this.meetingRepository.save(meeting);
                 this.sequenceService.setNextValue(Meeting.SEQUENCE_ID);
+
+                this.incrementNumberOfMeetings(triggerer);
+                this.incrementNumberOfMeetings(targeted);
 
                 return meeting;
             } else throw new NoSuchAccountException(meetingRequest.getTargetAccountPhoneNumber());
@@ -83,5 +88,11 @@ public class MeetingService {
 
             return detailedMeetingResponses;
         } else throw new NoSuchAccountException(accountId);
+    }
+
+    public void incrementNumberOfMeetings(Account account) {
+        account.setNumberOfMeetings(account.getNumberOfMeetings() + 1);
+
+        this.accountRepository.save(account);
     }
 }

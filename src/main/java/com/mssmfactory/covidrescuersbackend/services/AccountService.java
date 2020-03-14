@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AccountService {
@@ -47,6 +46,7 @@ public class AccountService {
                         account.setFirstName(accountRegistrationRequest.getFirstName());
                         account.setPhoneNumber(accountRegistrationRequest.getPhoneNumber());
                         account.setAccountState(Account.AccountState.HEALTHY);
+                        account.setNumberOfMeetings(0);
 
                         account.setCityId(city.get().getId());
                         account.setTownId(accountRegistrationRequest.getTownId());
