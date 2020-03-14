@@ -13,8 +13,6 @@ public class MeetingRequest {
     @NotNull
     private String triggererAccountPhoneNumber, targetAccountPhoneNumber;
 
-    private LocalDateTime localDateTime;
-
     @NotNull
     private Double longitude, latitude;
 }
