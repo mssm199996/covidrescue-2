@@ -18,6 +18,18 @@
         <java.version>11</java.version>
     </properties>
 
+
+    <repositories>
+        <repository>
+            <id>spring-boot-throttling-repo</id>
+            <url>https://raw.github.com/weddini/spring-boot-throttling/mvn-repo/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

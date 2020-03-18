@@ -28,15 +28,33 @@ public class AccountRestController {
         return this.accountRepository.findAll();
     }
 
+    // ----------------------------------------------------------------------------------------------------
+
+    @GetMapping("findLoggedInAccount")
+    public Account findLoggedInAccount() {
+        return this.accountService.findLoggedInAccount();
+    }
+
     @GetMapping("findByPhoneNumber")
     public Account findByPhoneNumber(@RequestParam("phoneNumber") String phoneNumber) {
         Optional<Account> accountOptional = this.accountRepository.findByPhoneNumber(phoneNumber);
 
         if (accountOptional.isPresent())
             return accountOptional.get();
-
-        return null;
+        else return null;
     }
+
+    @GetMapping("findStateByPhoneNumber")
+    public Account.AccountState findStateByPhoneNumber(@RequestParam("phoneNumber") String phoneNumber) {
+        Optional<Account> accountOptional = this.accountRepository.findByPhoneNumber(phoneNumber);
+
+        if (accountOptional.isPresent())
+            return accountOptional.get().getAccountState();
+        else return null;
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------
 
     @PatchMapping("updateAccountState/{accountId}")
     public ResponseEntity updateAccountState(@PathVariable("accountId") Long accountId,
@@ -45,6 +63,8 @@ public class AccountRestController {
 
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    // ----------------------------------------------------------------------------------------------------
 
     @PostMapping
     public ResponseEntity<Account> save(@Valid @RequestBody AccountRegistrationRequest accountRegistrationRequest) {

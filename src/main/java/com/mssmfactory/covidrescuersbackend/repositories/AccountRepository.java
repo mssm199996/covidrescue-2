@@ -11,4 +11,12 @@ import java.util.Optional;
 public interface AccountRepository extends MongoRepository<Account, Long> {
 
     Optional<Account> findByPhoneNumber(String phoneNumber);
+
+    Optional<Account> findByUsername(String username);
+
+    Long countAllByAccountRole(Account.AccountRole accountRole);
+
+    Long countAllByCityIdAndAccountState(Integer cityId, Account.AccountState accountState);
+
+    Long countAllByTownIdAndAccountState(Integer townId, Account.AccountState accountState);
 }

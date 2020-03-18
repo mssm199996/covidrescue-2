@@ -8,6 +8,7 @@ import com.mssmfactory.covidrescuersbackend.exceptions.NoSuchAccountException;
 import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.MeetingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,70 +28,77 @@ public class MeetingService {
     @Autowired
     private SequenceService sequenceService;
 
-    public Meeting save(MeetingRequest meetingRequest) {
-        Optional<Account> triggererAccount = this.accountRepository.findByPhoneNumber(meetingRequest.getTriggererAccountPhoneNumber());
+    public Meeting save(Account triggerer, MeetingRequest meetingRequest) {
+        Optional<Account> targetedAccount = this.accountRepository.findByPhoneNumber(meetingRequest.getTargetAccountPhoneNumber());
 
-        if (triggererAccount.isPresent()) {
-            Optional<Account> targetedAccount = this.accountRepository.findByPhoneNumber(meetingRequest.getTargetAccountPhoneNumber());
+        if (targetedAccount.isPresent()) {
+            Account targeted = targetedAccount.get();
 
-            if (targetedAccount.isPresent()) {
-                Account triggerer = triggererAccount.get();
-                Account targeted = targetedAccount.get();
+            Meeting meeting = new Meeting();
+            meeting.setId(this.sequenceService.getNextValue(Meeting.SEQUENCE_ID));
+            meeting.setMoment(LocalDateTime.now());
+            meeting.setTargetAccountId(targeted.getId());
+            meeting.setTriggererAccountId(triggerer.getId());
+            meeting.setTriggererAccountState(triggerer.getAccountState());
+            meeting.setTargetAccountState(targeted.getAccountState());
+            meeting.setPosition(new GeoJsonPoint(
+                    meetingRequest.getLongitude(),
+                    meetingRequest.getLatitude())
+            );
 
-                Meeting meeting = new Meeting();
-                meeting.setId(this.sequenceService.getNextValue(Meeting.SEQUENCE_ID));
-                meeting.setLatitude(meetingRequest.getLatitude());
-                meeting.setLocalDateTime(LocalDateTime.now());
-                meeting.setLongitude(meetingRequest.getLongitude());
-                meeting.setTargetAccountId(targeted.getId());
-                meeting.setTriggererAccountId(triggerer.getId());
-                meeting.setTriggererAccountState(triggerer.getAccountState());
-                meeting.setTargetAccountState(targeted.getAccountState());
+            this.meetingRepository.save(meeting);
+            this.sequenceService.setNextValue(Meeting.SEQUENCE_ID);
 
-                this.meetingRepository.save(meeting);
-                this.sequenceService.setNextValue(Meeting.SEQUENCE_ID);
+            this.incrementNumberOfMeetings(triggerer);
+            this.incrementNumberOfMeetings(targeted);
 
-                this.incrementNumberOfMeetings(triggerer);
-                this.incrementNumberOfMeetings(targeted);
-
-                return meeting;
-            } else throw new NoSuchAccountException(meetingRequest.getTargetAccountPhoneNumber());
-        } else throw new NoSuchAccountException(meetingRequest.getTriggererAccountPhoneNumber());
+            return meeting;
+        } else throw new NoSuchAccountException(meetingRequest.getTargetAccountPhoneNumber());
     }
 
-    public List<DetailedMeetingResponse> findDetailedMeetings(Long accountId) {
+    // -----------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------
+
+    public List<DetailedMeetingResponse> findDetailedMeetingsByTriggeredOrTarget(Long accountId) {
         Optional<Account> accountOptional = this.accountRepository.findById(accountId);
 
         if (accountOptional.isPresent()) {
             Account account = accountOptional.get();
 
-            List<Meeting> meetings = this.meetingRepository.
-                    findByTriggererAccountIdOrTargetAccountIdOrderByLocalDateTimeDesc(account.getId(),
-                            account.getId());
-
-            List<DetailedMeetingResponse> detailedMeetingResponses = new ArrayList<>(meetings.size());
-
-            for (Meeting meeting : meetings) {
-                Optional<Account> triggererAccount = this.accountRepository.findById(meeting.getTriggererAccountId());
-                Optional<Account> targetAccount = this.accountRepository.findById(meeting.getTargetAccountId());
-
-                DetailedMeetingResponse detailedMeetingResponse = new DetailedMeetingResponse();
-                detailedMeetingResponse.setMeeting(meeting);
-
-                if (targetAccount.isPresent())
-                    detailedMeetingResponse.setTargetAccount(targetAccount.get());
-
-                if (triggererAccount.isPresent())
-                    detailedMeetingResponse.setTriggererAccount(triggererAccount.get());
-
-                detailedMeetingResponses.add(detailedMeetingResponse);
-            }
-
-            return detailedMeetingResponses;
+            return this.findDetailedMeetingsByTriggeredOrTarget(account);
         } else throw new NoSuchAccountException(accountId);
     }
 
-    public void incrementNumberOfMeetings(Account account) {
+    public List<DetailedMeetingResponse> findDetailedMeetingsByTriggeredOrTarget(Account account) {
+        List<Meeting> meetings = this.meetingRepository.
+                findByTriggererAccountIdOrTargetAccountIdOrderByMomentDesc(account.getId(),
+                        account.getId());
+
+        List<DetailedMeetingResponse> detailedMeetingResponses = new ArrayList<>(meetings.size());
+
+        for (Meeting meeting : meetings) {
+            Optional<Account> triggererAccount = this.accountRepository.findById(meeting.getTriggererAccountId());
+            Optional<Account> targetAccount = this.accountRepository.findById(meeting.getTargetAccountId());
+
+            DetailedMeetingResponse detailedMeetingResponse = new DetailedMeetingResponse();
+            detailedMeetingResponse.setMeeting(meeting);
+
+            if (targetAccount.isPresent())
+                detailedMeetingResponse.setTargetAccount(targetAccount.get());
+
+            if (triggererAccount.isPresent())
+                detailedMeetingResponse.setTriggererAccount(triggererAccount.get());
+
+            detailedMeetingResponses.add(detailedMeetingResponse);
+        }
+
+        return detailedMeetingResponses;
+    }
+
+    // -----------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------
+
+    private void incrementNumberOfMeetings(Account account) {
         account.setNumberOfMeetings(account.getNumberOfMeetings() + 1);
 
         this.accountRepository.save(account);

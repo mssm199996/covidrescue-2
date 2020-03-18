@@ -1,6 +1,6 @@
 package com.mssmfactory.covidrescuersbackend.security;
 
-import net.bytebuddy.asm.Advice;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,38 +15,56 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, jsr250Enabled = true, securedEnabled = true)
-class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    public static final String USER_ROLE = "USER_ROLE";
+    public static final String ADMIN_ROLE = "ADMIN_ROLE";
+    public static final String DEV_ROLE = "DEV_ROLE";
+    public static final String API_ROLE = "API_ROLE";
+    public static final String OPEN_API_ROLE = "API_ROLE";
 
     @Value("${mssm.api.key.header.key}")
     private String apiKeyHeaderKey;
 
     @Value("${mssm.api.key.value}")
     private String apiKeyValue;
+    @Value("${mssm.api.role.value}")
+    private String apiRole;
 
-    @Value("${mssm.admin.username}")
-    private String adminUsername;
+    @Value("${mssm.open-api.key.value}")
+    private String openApiKeyValue;
+    @Value("${mssm.open-api.role.value}")
+    private String openApiRole;
 
-    @Value("${mssm.admin.password}")
-    private String adminPassword;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UsernamePasswordAuthentication usernamePasswordAuthentication;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        ApiKeyFilter apiKeyFilter = new ApiKeyFilter(this.apiKeyHeaderKey, this.apiKeyValue, this.passwordEncoder());
+        ApiKeyFilter.API_PASSWORD = passwordEncoder.encode("covidrescruers-api-2020");
+
+        ApiKeyFilter apiKeyFilter = new ApiKeyFilter(this.apiKeyHeaderKey, this.apiKeyValue,
+                this.apiRole);
 
         http.csrf()
                 .disable()
                 .exceptionHandling()
-                // --------------------------------------------------------------
+                // -----------------------------------------------------------------------------------------------------
 
                 .and()
                 .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class)
 
-                // --------------------------------------------------------------
-                // --------------------------------------------------------------
+                // -----------------------------------------------------------------------------------------------------
+                // -----------------------------------------------------------------------------------------------------
 
                 .formLogin()
-                .defaultSuccessUrl("/swagger-ui.html", true)
-                // --------------------------------------------------------------
+                .successHandler(new SecurityAuthenticationSuccessHandler())
+
+                // -----------------------------------------------------------------------------------------------------
 
                 .and()
                 .logout()
@@ -54,38 +72,102 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .logoutSuccessUrl("/")
                 .invalidateHttpSession(true)
 
-                // --------------------------------------------------------------
+                // -----------------------------------------------------------------------------------------------------
+                // -----------------------------------------------------------------------------------------------------
+                // -----------------------------------------------------------------------------------------------------
 
                 .and()
                 .authorizeRequests()
+
+                // -----------------------------------------------------------------------------------------------------
+
                 .antMatchers("/login.html", "/login")
                 .anonymous()
 
-                // --------------------------------------------------------------
+                // -----------------------------------------------------------------------------------------------------
 
                 .antMatchers("/logout")
                 .authenticated()
 
-                // --------------------------------------------------------------
+                // -----------------------------------------------------------------------------------------------------
 
-                .antMatchers("/swagger-ui.html**")
-                .hasRole("ADMIN_ROLE")
+                .antMatchers(
+                        "/account/findAll",
+                        "/account/findByPhoneNumber",
+                        "/account/updateAccountState/**",
+                        "/meeting/findDetailedMeetings/**")
+                .hasAnyAuthority(
+                        WebSecurityConfig.DEV_ROLE,
+                        WebSecurityConfig.ADMIN_ROLE
+                )
 
-                // --------------------------------------------------------------
+                // -----------------------------------------------------------------------------------------------------
 
-                .anyRequest().authenticated();
+                .antMatchers(HttpMethod.POST, "/meeting/")
+                .hasAnyAuthority(
+                        WebSecurityConfig.DEV_ROLE,
+                        WebSecurityConfig.USER_ROLE
+                )
+
+                .antMatchers("/meeting/findDetailedMeetingsByLoggedInAccount")
+                .hasAnyAuthority(
+                        WebSecurityConfig.DEV_ROLE,
+                        WebSecurityConfig.USER_ROLE
+                )
+
+                // -----------------------------------------------------------------------------------------------------
+
+                .antMatchers("/notification/**",
+                        "/account/findLoggedInAccount",
+
+                        "/account/findStateByPhoneNumber")
+                .hasAnyAuthority(
+                        WebSecurityConfig.DEV_ROLE,
+                        WebSecurityConfig.ADMIN_ROLE,
+                        WebSecurityConfig.USER_ROLE
+                )
+
+                // -----------------------------------------------------------------------------------------------------
+
+                .antMatchers("/analysis/**")
+                .hasAnyAuthority(
+                        WebSecurityConfig.DEV_ROLE,
+                        WebSecurityConfig.ADMIN_ROLE,
+                        WebSecurityConfig.API_ROLE
+                )
+
+
+                // -----------------------------------------------------------------------------------------------------
+
+                .antMatchers("/meeting/countAllByAccountStateNearPosition")
+                .hasAnyAuthority(
+                        WebSecurityConfig.DEV_ROLE,
+                        WebSecurityConfig.ADMIN_ROLE,
+                        WebSecurityConfig.API_ROLE,
+                        WebSecurityConfig.USER_ROLE
+                )
+
+                // -----------------------------------------------------------------------------------------------------
+
+                .antMatchers("/user/**").hasAuthority(WebSecurityConfig.USER_ROLE)
+                .antMatchers("/admin/**").hasAuthority(WebSecurityConfig.ADMIN_ROLE)
+                .antMatchers("/swagger**", "/v2/api-docs**", "/swagger-resources/**", "/csrf").hasAuthority(WebSecurityConfig.DEV_ROLE)
+
+                // -----------------------------------------------------------------------------------------------------
+
+                .antMatchers(HttpMethod.POST, "/account")
+                .permitAll()
+
+                .antMatchers("/", "/city/findAll", "/town/findAll", "/webjars/**")
+                .permitAll()
+
+                // -----------------------------------------------------------------------------------------------------
+
+                .anyRequest().denyAll();
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser(this.adminUsername)
-                .password(this.passwordEncoder().encode(this.adminPassword))
-                .roles("ADMIN_ROLE");
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    protected void configure(AuthenticationManagerBuilder auth) {
+        auth.authenticationProvider(this.usernamePasswordAuthentication);
     }
 }

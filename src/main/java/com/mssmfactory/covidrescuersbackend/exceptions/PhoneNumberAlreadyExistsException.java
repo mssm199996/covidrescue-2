@@ -1,5 +1,6 @@
 package com.mssmfactory.covidrescuersbackend.exceptions;
 
+import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
 import com.mssmfactory.covidrescuersbackend.dto.AccountRegistrationRequest;
 
 public class PhoneNumberAlreadyExistsException extends RuntimeException {
