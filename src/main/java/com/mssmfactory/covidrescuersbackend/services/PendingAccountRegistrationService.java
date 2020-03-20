@@ -12,6 +12,7 @@ import com.mssmfactory.covidrescuersbackend.repositories.PendingAccountRegistrat
 import com.mssmfactory.covidrescuersbackend.repositories.TownRepository;
 import com.mssmfactory.covidrescuersbackend.utils.SMSHandler;
 import net.bytebuddy.utility.RandomString;
+import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,9 @@ public class PendingAccountRegistrationService {
     @Autowired
     private SMSHandler smsHandler;
 
+    RandomStringGenerator tokensGenerator = new RandomStringGenerator.Builder()
+            .withinRange('0', '1').build();
+
     @Autowired
     private HttpServletRequest httpServletRequest;
 
@@ -73,7 +77,7 @@ public class PendingAccountRegistrationService {
 
         if (!duplicateAccount.isPresent()) {
             Locale locale = this.httpServletRequest.getLocale();
-            String token = "CR-" + RandomString.make(8).toUpperCase();
+            String token = this.tokensGenerator.generate(6);
 
             Optional<PendingAccountRegistration> pendingAccountRegistrationOptional =
                     this.pendingAccountRegistrationRepository.findByPhoneNumber(
