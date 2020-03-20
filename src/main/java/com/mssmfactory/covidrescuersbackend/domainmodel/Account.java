@@ -1,5 +1,6 @@
 package com.mssmfactory.covidrescuersbackend.domainmodel;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mssmfactory.covidrescuersbackend.security.WebSecurityConfig;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +29,11 @@ public class Account implements UserDetails {
     private Long id;
 
     @NotNull
-    private String firstName, famillyName, password, username;
+    private String firstName, famillyName, username;
+
+    @NotNull
+    @JsonIgnore
+    private String password;
 
     @NotNull
     @Indexed(unique = true)

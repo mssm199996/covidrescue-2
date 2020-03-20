@@ -110,8 +110,8 @@ class CovidrescuersBackendApplicationTests {
         account.setAccountState(Account.AccountState.HEALTHY);
         account.setCityId(1);
         account.setTownId(1);
-        account.setFirstName("FIR: [" + name + "]");
-        account.setFamillyName("FAM: [" + name + "]");
+        account.setFirstName(name);
+        account.setFamillyName(name);
         account.setNumberOfMeetings(0);
 
         this.accountRepository.save(account);

@@ -1,5 +1,6 @@
 package com.mssmfactory.covidrescuersbackend.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +44,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UsernamePasswordAuthentication usernamePasswordAuthentication;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         ApiKeyFilter.API_PASSWORD = passwordEncoder.encode("covidrescruers-api-2020");
@@ -62,7 +66,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // -----------------------------------------------------------------------------------------------------
 
                 .formLogin()
-                .successHandler(new SecurityAuthenticationSuccessHandler())
+                .successHandler(new SecurityAuthenticationSuccessHandler(this.objectMapper))
 
                 // -----------------------------------------------------------------------------------------------------
 
@@ -88,6 +92,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers("/logout")
                 .authenticated()
+
+                // -----------------------------------------------------------------------------------------------------
+
+                .antMatchers("/pendingAccountRegistration/findAll")
+                .hasAuthority(WebSecurityConfig.DEV_ROLE)
 
                 // -----------------------------------------------------------------------------------------------------
 
@@ -119,7 +128,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers("/notification/**",
                         "/account/findLoggedInAccount",
-
                         "/account/findStateByPhoneNumber")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
@@ -155,12 +163,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // -----------------------------------------------------------------------------------------------------
 
-                .antMatchers(HttpMethod.POST, "/account")
-                .permitAll()
-
                 .antMatchers("/", "/city/findAll", "/town/findAll", "/webjars/**")
                 .permitAll()
 
+                .antMatchers(HttpMethod.POST, "/pendingAccountRegistration")
+                .permitAll()
+
+                .antMatchers(HttpMethod.DELETE, "/pendingAccountRegistration")
+                .permitAll()
                 // -----------------------------------------------------------------------------------------------------
 
                 .anyRequest().denyAll();

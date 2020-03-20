@@ -1,9 +1,6 @@
 package com.mssmfactory.covidrescuersbackend.services;
 
-import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
-import com.mssmfactory.covidrescuersbackend.domainmodel.City;
-import com.mssmfactory.covidrescuersbackend.domainmodel.Meeting;
-import com.mssmfactory.covidrescuersbackend.domainmodel.Town;
+import com.mssmfactory.covidrescuersbackend.domainmodel.*;
 import com.mssmfactory.covidrescuersbackend.dto.AccountRegistrationRequest;
 import com.mssmfactory.covidrescuersbackend.exceptions.*;
 import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
@@ -68,46 +65,26 @@ public class AccountService {
 
     // -----------------------------------------------------------------------------------------------
 
-    public Account save(AccountRegistrationRequest accountRegistrationRequest) {
-        Optional<Account> duplicateAccount = this.accountRepository.findByPhoneNumber(
-                accountRegistrationRequest.getPhoneNumber());
+    public Account save(PendingAccountRegistration pendingAccountRegistration) {
+        Account account = new Account();
+        account.setPhoneNumber(pendingAccountRegistration.getPhoneNumber());
+        account.setUsername("User [" + pendingAccountRegistration.getPhoneNumber() + "]");
+        account.setId(this.sequenceService.getNextValue(Account.SEQUENCE_ID));
+        account.setFirstName(pendingAccountRegistration.getFirstName());
+        account.setFamillyName(pendingAccountRegistration.getFamillyName());
+        account.setAccountState(Account.AccountState.HEALTHY);
+        account.setNumberOfMeetings(0);
 
-        if (!duplicateAccount.isPresent()) {
-            Account account = new Account();
-            account.setPhoneNumber(accountRegistrationRequest.getPhoneNumber());
-            account.setUsername("User [" + accountRegistrationRequest.getPhoneNumber() + "]");
+        account.setPassword(pendingAccountRegistration.getPassword());
+        account.setAccountRole(Account.AccountRole.USER);
 
-            return this.save(accountRegistrationRequest, account);
-        } else throw new PhoneNumberAlreadyExistsException(accountRegistrationRequest);
-    }
+        account.setCityId(pendingAccountRegistration.getCityId());
+        account.setTownId(pendingAccountRegistration.getTownId());
 
-    private Account save(AccountRegistrationRequest accountRegistrationRequest, Account account) {
-        Optional<City> city = this.cityRepository.findById(accountRegistrationRequest.getCityId());
+        this.accountRepository.save(account);
+        this.sequenceService.setNextValue(Account.SEQUENCE_ID);
 
-        if (city.isPresent()) {
-            Optional<Town> town = this.townRepository.findById(accountRegistrationRequest.getTownId());
-
-            if (town.isPresent()) {
-                if (town.get().getCityId().equals(city.get().getId())) {
-                    account.setId(this.sequenceService.getNextValue(Account.SEQUENCE_ID));
-                    account.setFamillyName(accountRegistrationRequest.getFamillyName());
-                    account.setFirstName(accountRegistrationRequest.getFirstName());
-                    account.setAccountState(Account.AccountState.HEALTHY);
-                    account.setNumberOfMeetings(0);
-
-                    account.setPassword(this.passwordEncoder.encode(accountRegistrationRequest.getPassword()));
-                    account.setAccountRole(Account.AccountRole.USER);
-
-                    account.setCityId(city.get().getId());
-                    account.setTownId(accountRegistrationRequest.getTownId());
-
-                    this.accountRepository.save(account);
-                    this.sequenceService.setNextValue(Account.SEQUENCE_ID);
-
-                    return account;
-                } else throw new TownAndCityMismatchException(accountRegistrationRequest);
-            } else throw new NoSuchTownException(accountRegistrationRequest);
-        } else throw new NoSuchCityException(accountRegistrationRequest);
+        return account;
     }
 
     // -----------------------------------------------------------------------------------------------
