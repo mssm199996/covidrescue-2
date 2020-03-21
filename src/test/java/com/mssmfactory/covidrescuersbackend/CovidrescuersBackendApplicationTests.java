@@ -75,7 +75,7 @@ class CovidrescuersBackendApplicationTests {
         System.out.println("Simulation started");
         for (Meeting meeting : orderedMeetings) {
             System.out.println("meeting: " + meeting);
-            
+
             Account a1 = accountMap.get(meeting.getTriggererAccountId());
             Account a2 = accountMap.get(meeting.getTargetAccountId());
 
@@ -93,6 +93,9 @@ class CovidrescuersBackendApplicationTests {
                CC -> Nothing
              */
 
+            System.out.println("a1: " + a1);
+            System.out.println("a2: " + a2);
+
             if (s1 == Account.AccountState.HEALTHY && s2 == Account.AccountState.SUSPECTED)
                 a1.setAccountState(Account.AccountState.SUSPECTED);
             else if (s1 == Account.AccountState.HEALTHY && s2 == Account.AccountState.CONTAMINATED)
@@ -101,11 +104,19 @@ class CovidrescuersBackendApplicationTests {
                 a2.setAccountState(Account.AccountState.SUSPECTED);
             else if (s1 == Account.AccountState.CONTAMINATED && s2 == Account.AccountState.HEALTHY)
                 a2.setAccountState(Account.AccountState.SUSPECTED);
+
+            System.out.println("a1: " + a1);
+            System.out.println("a2: " + a2);
+            System.out.println("---------------------->");
         }
 
         System.out.println("Simulation finished");
         System.out.println("-----------------------------------------------------------------");
         List<Account> updatedAccounts = this.accountRepository.findAll();
+
+        for (Account account : updatedAccounts) {
+            System.out.println(":=> " + account);
+        }
 
         for (Account account : updatedAccounts) {
             Account twinAccount = accountMap.get(account.getId());

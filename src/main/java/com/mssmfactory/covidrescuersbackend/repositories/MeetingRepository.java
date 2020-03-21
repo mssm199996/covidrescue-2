@@ -38,8 +38,8 @@ public interface MeetingRepository extends MongoRepository<Meeting, Long> {
                     "{'triggererAccountId':?0}," +
                     "{'targetAccountId':?1}" +
                 "]," +
-                "'localDateTime':{$gt:?2}" +
+                "'moment':{$gt:?2}" +
             "}")
-    List<Meeting> findAllByTriggererAccountIdOrTargetAccountIdAndMomentLessThan(Long triggeredAccountId, Long targetAccountId,
-                                                                                LocalDateTime currentLocalDateTime);
+    List<Meeting> findAllByTriggererAccountIdOrTargetAccountIdAndMomentGreaterThan(Long triggeredAccountId, Long targetAccountId,
+                                                                                   LocalDateTime currentLocalDateTime);
 }

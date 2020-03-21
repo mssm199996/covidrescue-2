@@ -95,7 +95,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // -----------------------------------------------------------------------------------------------------
 
-                .antMatchers("/pendingAccountRegistration/findAll")
+                .antMatchers(
+                        "/accountPosition/findAll",
+                        "/pendingAccountRegistration/findAll")
                 .hasAuthority(WebSecurityConfig.DEV_ROLE)
 
                 // -----------------------------------------------------------------------------------------------------
@@ -129,7 +131,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/notification/**",
                         "/account/findLoggedInAccount",
                         "/account/findStateByPhoneNumber",
-                        "/account/updateLoggedInAccountPosition**")
+                        "/account/updateLoggedInAccountPosition**",
+
+                        "/accountPosition/findAllByLoggedInAccount")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
                         WebSecurityConfig.ADMIN_ROLE,

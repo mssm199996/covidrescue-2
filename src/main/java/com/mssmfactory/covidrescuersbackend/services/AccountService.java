@@ -1,23 +1,21 @@
 package com.mssmfactory.covidrescuersbackend.services;
 
-import com.mssmfactory.covidrescuersbackend.domainmodel.*;
-import com.mssmfactory.covidrescuersbackend.dto.AccountRegistrationRequest;
-import com.mssmfactory.covidrescuersbackend.exceptions.*;
+import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
+import com.mssmfactory.covidrescuersbackend.domainmodel.AccountPosition;
+import com.mssmfactory.covidrescuersbackend.domainmodel.PendingAccountRegistration;
+import com.mssmfactory.covidrescuersbackend.exceptions.NoSuchAccountException;
+import com.mssmfactory.covidrescuersbackend.repositories.AccountPositionRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
-import com.mssmfactory.covidrescuersbackend.repositories.CityRepository;
-import com.mssmfactory.covidrescuersbackend.repositories.MeetingRepository;
-import com.mssmfactory.covidrescuersbackend.repositories.TownRepository;
 import com.mssmfactory.covidrescuersbackend.utils.SuspectionPropagationHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class AccountService {
@@ -26,13 +24,7 @@ public class AccountService {
     private AccountRepository accountRepository;
 
     @Autowired
-    private MeetingRepository meetingRepository;
-
-    @Autowired
-    private CityRepository cityRepository;
-
-    @Autowired
-    private TownRepository townRepository;
+    private AccountPositionRepository accountPositionRepository;
 
     @Autowired
     private SuspectionPropagationHandler suspectionPropagationHandler;
@@ -42,9 +34,6 @@ public class AccountService {
 
     @Autowired
     private SequenceService sequenceService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     public Account findLoggedInAccount() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -91,7 +80,19 @@ public class AccountService {
     // -----------------------------------------------------------------------------------------------
 
     public void updateAccountPosition(Account account, Double longitude, Double latitude) {
-        account.setPosition(new GeoJsonPoint(longitude, latitude));
+        GeoJsonPoint geoJsonPoint = new GeoJsonPoint(longitude, latitude);
+
+        AccountPosition accountPosition = new AccountPosition();
+        accountPosition.setPosition(geoJsonPoint);
+        accountPosition.setAccountState(account.getAccountState());
+        accountPosition.setAccountId(account.getId());
+        accountPosition.setId(this.sequenceService.getNextValue(AccountPosition.SEQUENCE_ID));
+        accountPosition.setMoment(LocalDateTime.now());
+
+        this.accountPositionRepository.save(accountPosition);
+        this.sequenceService.setNextValue(AccountPosition.SEQUENCE_ID);
+
+        account.setPosition(geoJsonPoint);
         this.accountRepository.save(account);
     }
 

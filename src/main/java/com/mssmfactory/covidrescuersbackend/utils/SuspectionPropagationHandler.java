@@ -30,7 +30,7 @@ public class SuspectionPropagationHandler {
             meetingList = this.meetingRepository.findByTriggererAccountIdOrTargetAccountId(parentAccountId,
                     parentAccountId);
         } else {
-            meetingList = this.meetingRepository.findAllByTriggererAccountIdOrTargetAccountIdAndMomentLessThan(
+            meetingList = this.meetingRepository.findAllByTriggererAccountIdOrTargetAccountIdAndMomentGreaterThan(
                     parentAccountId, parentAccountId, parentToChildRelation.getMoment());
         }
 
