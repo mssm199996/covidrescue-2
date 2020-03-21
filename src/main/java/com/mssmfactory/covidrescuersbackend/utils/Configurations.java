@@ -35,19 +35,12 @@ public class Configurations implements WebMvcConfigurer {
                 .build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        final CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.setAllowedOrigins(ImmutableList.of("**"));
-        configuration.setAllowedMethods(ImmutableList.of("GET", "POST", "PUT", "DELETE", "PATCH"));
-        configuration.setAllowedHeaders(ImmutableList.of("Authorization", "Cache-Control", "Content-Type"));
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-
-        return source;
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE", "HEAD")
+                .allowedOrigins("http://localhost:8080", "http://localhost:8080/**")
+                .allowCredentials(true);
     }
 
     @Bean
