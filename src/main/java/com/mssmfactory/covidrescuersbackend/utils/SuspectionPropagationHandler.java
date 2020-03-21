@@ -23,7 +23,8 @@ public class SuspectionPropagationHandler {
         return result;
     }
 
-    private void propagate(Long parentAccountId, Meeting parentToChildRelation, Set<Long> accountsToUpdateIds, Set<Meeting> visitedMeetings) {
+    private void propagate(Long parentAccountId, Meeting parentToChildRelation, Set<Long> accountsToUpdateIds,
+                           Set<Long> visitedMeetingIds) {
         List<Meeting> meetingList;
 
         if (parentToChildRelation == null) {
@@ -34,21 +35,17 @@ public class SuspectionPropagationHandler {
                     parentAccountId, parentAccountId, parentToChildRelation.getMoment());
         }
 
-        System.out.println("visitedMeetings: " + visitedMeetings.size());
-
         for (Meeting meeting : meetingList) {
-            System.out.println("meeting: " + meeting);
-
-            if (!visitedMeetings.contains(meeting)) {
+            if (!visitedMeetingIds.contains(meeting.getId())) {
                 Long partnerId = meeting.getTriggererAccountId() == parentAccountId ?
                         meeting.getTargetAccountId() :
                         meeting.getTriggererAccountId();
 
                 // Mark this account as treated
                 accountsToUpdateIds.add(partnerId);
-                visitedMeetings.add(meeting);
+                visitedMeetingIds.add(meeting.getId());
 
-                this.propagate(partnerId, meeting, accountsToUpdateIds, visitedMeetings);
+                this.propagate(partnerId, meeting, accountsToUpdateIds, visitedMeetingIds);
             }
         }
     }

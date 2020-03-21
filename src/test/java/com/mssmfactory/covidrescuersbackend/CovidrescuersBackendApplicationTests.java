@@ -38,9 +38,9 @@ class CovidrescuersBackendApplicationTests {
         this.meetingRepository.deleteAll();
 
         final int numberOfDays = 1;
-        final int numberOfMeetingsPerDayPerAccount = 3;
+        final int numberOfMeetingsPerDayPerAccount = 8;
 
-        final int numberOfAccounts = 20;
+        final int numberOfAccounts = 100;
         final int numberOfRelations = numberOfAccounts * numberOfMeetingsPerDayPerAccount * numberOfDays;
 
         ArrayList<Account> accounts = new ArrayList<>(numberOfAccounts);
