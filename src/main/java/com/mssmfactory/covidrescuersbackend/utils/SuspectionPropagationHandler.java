@@ -35,6 +35,8 @@ public class SuspectionPropagationHandler {
         }
 
         for (Meeting meeting : meetingList) {
+            System.out.println("meeting: " + meeting);
+
             if (!visitedMeetings.contains(meeting)) {
                 Long partnerId = meeting.getTriggererAccountId() == parentAccountId ?
                         meeting.getTargetAccountId() :

@@ -64,6 +64,11 @@ public class Account implements UserDetails {
     private Set<SimpleGrantedAuthority> authorities = new HashSet<>();
 
     @Override
+    public int hashCode() {
+        return this.getId().hashCode();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;

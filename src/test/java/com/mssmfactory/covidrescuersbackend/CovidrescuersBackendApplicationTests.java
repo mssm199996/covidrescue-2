@@ -34,10 +34,10 @@ class CovidrescuersBackendApplicationTests {
 
     @Test
     void fullyTestPropagation() {
-        final int numberOfDays = 3;
-        final int numberOfMeetingsPerDayPerAccount = 10;
+        final int numberOfDays = 1;
+        final int numberOfMeetingsPerDayPerAccount = 3;
 
-        final int numberOfAccounts = 100;
+        final int numberOfAccounts = 20;
         final int numberOfRelations = numberOfAccounts * numberOfMeetingsPerDayPerAccount * numberOfDays;
 
         ArrayList<Account> accounts = new ArrayList<>(numberOfAccounts);

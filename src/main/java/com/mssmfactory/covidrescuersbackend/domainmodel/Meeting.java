@@ -39,4 +39,14 @@ public class Meeting {
     @NotNull
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
     private GeoJsonPoint position;
+
+    @Override
+    public int hashCode() {
+        return this.getId().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o != null && o instanceof Meeting && this.getId() == ((Meeting) o).getId();
+    }
 }
