@@ -10,6 +10,7 @@ import com.mssmfactory.covidrescuersbackend.repositories.TownRepository;
 import com.mssmfactory.covidrescuersbackend.utils.SuspectionPropagationHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -89,6 +90,11 @@ public class AccountService {
 
     // -----------------------------------------------------------------------------------------------
 
+    public void updateAccountPosition(Account account, Double longitude, Double latitude) {
+        account.setPosition(new GeoJsonPoint(longitude, latitude));
+        this.accountRepository.save(account);
+    }
+
     public void updateAccountState(Long accountId, Account.AccountState accountState) {
         Optional<Account> accountOptional = this.accountRepository.findById(accountId);
 
@@ -115,9 +121,6 @@ public class AccountService {
 
             // This is now contaminated, we need to propagate this event to concerned persons
             if (accountState == Account.AccountState.CONTAMINATED) {
-                Set<Long> alreadyTreatedAccountsIds = new HashSet<>();
-                alreadyTreatedAccountsIds.add(accountId);
-
                 (new Thread(() -> {
                     this.propagateOnContaminated(account.getId());
                 })).start();
@@ -125,7 +128,7 @@ public class AccountService {
         } else throw new NoSuchAccountException(accountId);
     }
 
-    private synchronized void propagateOnContaminated(Long contaminatedAccountId) {
+    public synchronized void propagateOnContaminated(Long contaminatedAccountId) {
         Set<Long> accountsIdsToUpdate = this.suspectionPropagationHandler.propagate(contaminatedAccountId);
 
         if (!accountsIdsToUpdate.isEmpty()) {

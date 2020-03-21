@@ -5,14 +5,16 @@ import com.mssmfactory.covidrescuersbackend.domainmodel.Meeting;
 import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.MeetingRepository;
 import com.mssmfactory.covidrescuersbackend.services.AccountService;
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.tomcat.jni.Local;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
 import java.time.LocalDateTime;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 class CovidrescuersBackendApplicationTests {
@@ -28,7 +30,94 @@ class CovidrescuersBackendApplicationTests {
 
     @Test
     void contextLoads() {
+    }
 
+    @Test
+    void fullyTestPropagation() {
+        final int numberOfDays = 3;
+        final int numberOfMeetingsPerDayPerAccount = 10;
+
+        final int numberOfAccounts = 100;
+        final int numberOfRelations = numberOfAccounts * numberOfMeetingsPerDayPerAccount * numberOfDays;
+
+        ArrayList<Account> accounts = new ArrayList<>(numberOfAccounts);
+        ArrayList<Meeting> meetings = new ArrayList<>(numberOfRelations);
+
+        Map<Long, Account> accountMap = new HashMap<>();
+
+        for (int i = 0; i < numberOfAccounts; i++) {
+            Account account = this.createTestAccount("P" + i);
+            accounts.add(account);
+            accountMap.put(account.getId(), account);
+        }
+
+        for (int i = 0; i < numberOfRelations; i++) {
+            Account triggerer = this.pickRandomAccount(accounts, null);
+            Account targeted = this.pickRandomAccount(accounts, triggerer);
+
+            Meeting meeting = this.createTestMeeting(triggerer, targeted);
+            meetings.add(meeting);
+        }
+
+        Account contaminatedAccount = this.pickRandomAccount(accounts, null);
+        contaminatedAccount.setAccountState(Account.AccountState.CONTAMINATED);
+
+        System.out.println("Contaminated account: " + contaminatedAccount.getId());
+        this.accountRepository.save(contaminatedAccount);
+
+        System.out.println("Propagation started");
+        this.accountService.propagateOnContaminated(contaminatedAccount.getId());
+        System.out.println("Propagation finished");
+
+        List<Meeting> orderedMeetings = meetings.stream().sorted(Comparator.comparing(Meeting::getMoment))
+                .collect(Collectors.toList());
+
+        System.out.println("Simulation started");
+        for (Meeting meeting : orderedMeetings) {
+            System.out.println("meeting: " + meeting);
+            
+            Account a1 = accountMap.get(meeting.getTriggererAccountId());
+            Account a2 = accountMap.get(meeting.getTargetAccountId());
+
+            Account.AccountState s1 = a1.getAccountState();
+            Account.AccountState s2 = a2.getAccountState();
+
+            /* HH -> Nothing
+               HS -> 1 = S
+               HC -> 1 = S
+               SH -> 2 = S
+               SS -> Nothing
+               SC -> Nothing
+               CH -> 2 = S
+               CS -> Nothing
+               CC -> Nothing
+             */
+
+            if (s1 == Account.AccountState.HEALTHY && s2 == Account.AccountState.SUSPECTED)
+                a1.setAccountState(Account.AccountState.SUSPECTED);
+            else if (s1 == Account.AccountState.HEALTHY && s2 == Account.AccountState.CONTAMINATED)
+                a1.setAccountState(Account.AccountState.SUSPECTED);
+            else if (s1 == Account.AccountState.SUSPECTED && s2 == Account.AccountState.HEALTHY)
+                a2.setAccountState(Account.AccountState.SUSPECTED);
+            else if (s1 == Account.AccountState.CONTAMINATED && s2 == Account.AccountState.HEALTHY)
+                a2.setAccountState(Account.AccountState.SUSPECTED);
+        }
+
+        System.out.println("Simulation finished");
+        System.out.println("-----------------------------------------------------------------");
+        List<Account> updatedAccounts = this.accountRepository.findAll();
+
+        for (Account account : updatedAccounts) {
+            Account twinAccount = accountMap.get(account.getId());
+
+            if (twinAccount != null) {
+                System.out.println("Account: " + account);
+                System.out.println("Twin Account: " + twinAccount);
+
+                assert account.getAccountState().equals(twinAccount.getAccountState());
+                System.out.println("------------------------------------------------");
+            }
+        }
     }
 
     @Test
@@ -80,6 +169,32 @@ class CovidrescuersBackendApplicationTests {
 
     private Long nextMeetingId = 1L;
 
+    private Meeting createTestMeeting(Account triggerer, Account target) {
+        Double randomDaysOp = 2 * Math.random() - 1;
+        Double randomHoursOp = 2 * Math.random() - 1;
+        Double randomMinutesOp = 2 * Math.random() - 1;
+
+        Integer randomDays = RandomUtils.nextInt(0, 90);
+        Integer randomHours = RandomUtils.nextInt(0, 90);
+        Integer randomMinutes = RandomUtils.nextInt(0, 90);
+
+        LocalDateTime localDateTime = LocalDateTime.now();
+
+        if (randomDaysOp >= 0.0)
+            localDateTime = localDateTime.plusDays(randomDays);
+        else localDateTime = localDateTime.minusDays(randomDays);
+
+        if (randomHoursOp >= 0.0)
+            localDateTime = localDateTime.plusHours(randomHours);
+        else localDateTime = localDateTime.minusHours(randomHours);
+
+        if (randomMinutesOp >= 0.0)
+            localDateTime = localDateTime.plusMinutes(randomMinutes);
+        else localDateTime = localDateTime.minusMinutes(randomMinutes);
+
+        return this.createTestMeeting(triggerer, target, localDateTime);
+    }
+
     private Meeting createTestMeeting(Account triggerer, Account target,
                                       LocalDateTime localDateTime) {
         Random random = new Random();
@@ -117,5 +232,16 @@ class CovidrescuersBackendApplicationTests {
         this.accountRepository.save(account);
 
         return account;
+    }
+
+    private Account pickRandomAccount(ArrayList<Account> accounts, Account accountToAvoid) {
+        while (true) {
+            int i = (int) (Math.random() * (accounts.size() - 1));
+
+            Account account = accounts.get(i);
+
+            if (accountToAvoid == null || !account.equals(accountToAvoid))
+                return account;
+        }
     }
 }

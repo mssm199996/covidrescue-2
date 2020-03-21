@@ -33,6 +33,7 @@ public class Meeting {
     @NotNull
     private Account.AccountState triggererAccountState, targetAccountState;
 
+    @Indexed
     private LocalDateTime moment;
 
     @NotNull

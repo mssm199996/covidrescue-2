@@ -128,7 +128,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers("/notification/**",
                         "/account/findLoggedInAccount",
-                        "/account/findStateByPhoneNumber")
+                        "/account/findStateByPhoneNumber",
+                        "/account/updateLoggedInAccountPosition**")
+                .hasAnyAuthority(
+                        WebSecurityConfig.DEV_ROLE,
+                        WebSecurityConfig.ADMIN_ROLE,
+                        WebSecurityConfig.USER_ROLE
+                )
+
+                .antMatchers(HttpMethod.POST, "/meeting")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
                         WebSecurityConfig.ADMIN_ROLE,
@@ -163,7 +171,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // -----------------------------------------------------------------------------------------------------
 
-                .antMatchers("/", "/city/findAll", "/town/findAll", "/webjars/**")
+                .antMatchers("/", "/city/findAll", "/town/findAll", "/webjars/**", "/account/isAccountAuthenticated")
                 .permitAll()
 
                 .antMatchers(HttpMethod.POST, "/pendingAccountRegistration")
