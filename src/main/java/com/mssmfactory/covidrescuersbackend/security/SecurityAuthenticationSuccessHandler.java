@@ -8,6 +8,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class SecurityAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
@@ -30,11 +31,14 @@ public class SecurityAuthenticationSuccessHandler implements AuthenticationSucce
                 case USER:
                     break;
                 case DEV:
+                    httpServletResponse.sendRedirect("/wagger-ui.html");
                     break;
                 case API:
                     break;
             }
         } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
