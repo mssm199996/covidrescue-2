@@ -54,7 +54,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         ApiKeyFilter apiKeyFilter = new ApiKeyFilter(this.apiKeyHeaderKey, this.apiKeyValue,
                 this.apiRole);
 
-        http.csrf()
+        http.cors().disable().csrf()
                 .disable()
                 .exceptionHandling()
                 // -----------------------------------------------------------------------------------------------------
