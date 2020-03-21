@@ -1,5 +1,6 @@
 package com.mssmfactory.covidrescuersbackend.restcontrollers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Meeting;
 import com.mssmfactory.covidrescuersbackend.dto.DetailedMeetingResponse;
@@ -39,7 +40,7 @@ public class MeetingRestController {
     }
 
     @GetMapping("findDetailedMeetings/{accountId}")
-    public List<DetailedMeetingResponse> findDetailedMeetings(@PathVariable("accountId") Long accountId) {
+    public List<DetailedMeetingResponse> findDetailedMeetings(@PathVariable("accountId") Long accountId) throws JsonProcessingException {
         List<DetailedMeetingResponse> detailedMeetingResponses = this.meetingService.findDetailedMeetingsByTriggeredOrTarget(accountId);
 
         return detailedMeetingResponses;
@@ -59,7 +60,7 @@ public class MeetingRestController {
     // ---------------------------------------------------------------------------------------------------
 
     @PostMapping
-    public ResponseEntity<Meeting> save(@Valid @RequestBody MeetingRequest meetingRequest) {
+    public ResponseEntity<Meeting> save(@Valid @RequestBody MeetingRequest meetingRequest) throws JsonProcessingException {
         Account account = this.accountService.findLoggedInAccount();
 
         if (account != null) {

@@ -1,5 +1,6 @@
 package com.mssmfactory.covidrescuersbackend.restcontrollers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.util.concurrent.RateLimiter;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
 import com.mssmfactory.covidrescuersbackend.domainmodel.PendingAccountRegistration;
@@ -34,14 +35,14 @@ public class PendingAccountRegistrationRestController {
     }
 
     @PostMapping
-    private void save(@Valid @RequestBody AccountRegistrationRequest accountRegistrationRequest) {
+    private void save(@Valid @RequestBody AccountRegistrationRequest accountRegistrationRequest) throws JsonProcessingException {
         this.rateLimiter.acquire();
 
         this.pendingAccountRegistrationService.save(accountRegistrationRequest);
     }
 
     @DeleteMapping
-    private Account delete(@RequestParam("phoneNumber") String phoneNumber, @RequestParam("token") String token) {
+    private Account delete(@RequestParam("phoneNumber") String phoneNumber, @RequestParam("token") String token) throws JsonProcessingException {
         this.rateLimiter.acquire();
 
         return this.pendingAccountRegistrationService.delete(phoneNumber, token);

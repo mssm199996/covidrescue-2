@@ -1,5 +1,6 @@
 package com.mssmfactory.covidrescuersbackend.restcontrollers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
 import com.mssmfactory.covidrescuersbackend.dto.NotificationResponse;
 import com.mssmfactory.covidrescuersbackend.services.AccountService;
@@ -38,7 +39,7 @@ public class NotificationsRestController {
     @PatchMapping("updateNotificationMarkByLoggedInAccount/{notificationId}")
     public ResponseEntity updateNotificationMarkByLoggedInAccount(
             @PathVariable("notificationId") Long notificationId,
-            @RequestParam("mark") boolean marked) {
+            @RequestParam("mark") boolean marked) throws JsonProcessingException {
         Account account = this.accountService.findLoggedInAccount();
 
         if (account != null) {

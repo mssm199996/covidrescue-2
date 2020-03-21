@@ -1,5 +1,6 @@
 package com.mssmfactory.covidrescuersbackend.restcontrollers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mssmfactory.covidrescuersbackend.dto.CityStateCountResponse;
 import com.mssmfactory.covidrescuersbackend.dto.TownStateCountResponse;
 import com.mssmfactory.covidrescuersbackend.services.DataAnalysisService;
@@ -24,7 +25,7 @@ public class DataAnalysisRestController {
     }
 
     @GetMapping("findAllTownStateCountByCityId/{cityId}")
-    public List<TownStateCountResponse> findAllTownStateCountByCityId(@PathVariable("cityId") Integer cityId) {
+    public List<TownStateCountResponse> findAllTownStateCountByCityId(@PathVariable("cityId") Integer cityId) throws JsonProcessingException {
         return this.dataAnalysisService.findAllTownStateCountByCityId(cityId);
     }
 }

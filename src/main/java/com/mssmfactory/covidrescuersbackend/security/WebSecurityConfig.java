@@ -3,6 +3,7 @@ package com.mssmfactory.covidrescuersbackend.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -47,6 +48,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private MessageSource messageSource;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         ApiKeyFilter.API_PASSWORD = passwordEncoder.encode("covidrescruers-api-2020");
@@ -54,7 +58,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         ApiKeyFilter apiKeyFilter = new ApiKeyFilter(this.apiKeyHeaderKey, this.apiKeyValue,
                 this.apiRole);
 
-        http.cors().and()
+        http.cors()
+                .and()
                 .csrf()
                 .disable()
                 .exceptionHandling()
@@ -68,6 +73,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .formLogin()
                 .successHandler(new SecurityAuthenticationSuccessHandler(this.objectMapper))
+                .failureHandler(new SecurityAuthenticationFailureHandler(this.messageSource, this.objectMapper))
 
                 // -----------------------------------------------------------------------------------------------------
 
@@ -110,7 +116,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/meeting/findDetailedMeetings/**")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.ADMIN_ROLE
+                        WebSecurityConfig.ADMIN_ROLE,
+                        WebSecurityConfig.API_ROLE
                 )
 
                 // -----------------------------------------------------------------------------------------------------
@@ -138,6 +145,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
                         WebSecurityConfig.ADMIN_ROLE,
+                        WebSecurityConfig.API_ROLE,
                         WebSecurityConfig.USER_ROLE
                 )
 
@@ -145,6 +153,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
                         WebSecurityConfig.ADMIN_ROLE,
+                        WebSecurityConfig.API_ROLE,
                         WebSecurityConfig.USER_ROLE
                 )
 
@@ -154,7 +163,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
                         WebSecurityConfig.ADMIN_ROLE,
-                        WebSecurityConfig.API_ROLE
+                        WebSecurityConfig.API_ROLE,
+                        WebSecurityConfig.OPEN_API_ROLE
                 )
 
 
@@ -165,13 +175,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         WebSecurityConfig.DEV_ROLE,
                         WebSecurityConfig.ADMIN_ROLE,
                         WebSecurityConfig.API_ROLE,
-                        WebSecurityConfig.USER_ROLE
+                        WebSecurityConfig.USER_ROLE,
+                        WebSecurityConfig.OPEN_API_ROLE
                 )
 
                 // -----------------------------------------------------------------------------------------------------
 
-                .antMatchers("/user/**").hasAuthority(WebSecurityConfig.USER_ROLE)
-                .antMatchers("/admin/**").hasAuthority(WebSecurityConfig.ADMIN_ROLE)
                 .antMatchers("/swagger**", "/v2/api-docs**", "/swagger-resources/**", "/csrf").hasAuthority(WebSecurityConfig.DEV_ROLE)
 
                 // -----------------------------------------------------------------------------------------------------

@@ -1,12 +1,22 @@
 package com.mssmfactory.covidrescuersbackend.exceptions;
 
-public class NoSuchAccountException extends RuntimeException {
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.MessageSource;
 
-    public NoSuchAccountException(String phoneNumber) {
-        super("There's no account registered with the following phone number: " + phoneNumber);
+import javax.servlet.http.HttpServletRequest;
+
+public class NoSuchAccountException extends AppRuntimeException {
+
+    public NoSuchAccountException(MessageSource messageSource, HttpServletRequest httpServletRequest,
+                                  ObjectMapper objectMapper, String phoneNumber) throws JsonProcessingException {
+        super(messageSource, httpServletRequest, objectMapper, "error.no-such-account-phone-number.content",
+                new String[]{phoneNumber}, new String[]{"phoneNumber"});
     }
 
-    public NoSuchAccountException(Long accountId) {
-        super("There's no account registered with the following id: " + accountId);
+    public NoSuchAccountException(MessageSource messageSource, HttpServletRequest httpServletRequest,
+                                  ObjectMapper objectMapper, Long accountId) throws JsonProcessingException {
+        super(messageSource, httpServletRequest, objectMapper,
+                "error.no-such-account-id.content", new String[]{String.valueOf(accountId)}, new String[]{"accountId"});
     }
 }

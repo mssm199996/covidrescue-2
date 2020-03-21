@@ -1,5 +1,7 @@
 package com.mssmfactory.covidrescuersbackend.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
 import com.mssmfactory.covidrescuersbackend.domainmodel.City;
 import com.mssmfactory.covidrescuersbackend.domainmodel.PendingAccountRegistration;
@@ -11,9 +13,9 @@ import com.mssmfactory.covidrescuersbackend.repositories.CityRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.PendingAccountRegistrationRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.TownRepository;
 import com.mssmfactory.covidrescuersbackend.utils.SMSHandler;
-import net.bytebuddy.utility.RandomString;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,13 +50,19 @@ public class PendingAccountRegistrationService {
     @Autowired
     private SMSHandler smsHandler;
 
-    RandomStringGenerator tokensGenerator = new RandomStringGenerator.Builder()
-            .withinRange('0', '1').build();
-
     @Autowired
     private HttpServletRequest httpServletRequest;
 
-    public Account delete(String phoneNumber, String token) {
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private MessageSource messageSource;
+
+    RandomStringGenerator tokensGenerator = new RandomStringGenerator.Builder()
+            .withinRange('0', '1').build();
+
+    public Account delete(String phoneNumber, String token) throws JsonProcessingException {
         Optional<PendingAccountRegistration> pendingAccountRegistrationOptional =
                 this.pendingAccountRegistrationRepository.findByPhoneNumberAndToken(phoneNumber, token);
 
@@ -68,10 +76,11 @@ public class PendingAccountRegistrationService {
             })).start();
 
             return account;
-        } else throw new NoSuchPendingAccountRegistration(phoneNumber, token);
+        } else
+            throw new NoSuchPendingAccountRegistration(this.messageSource, this.httpServletRequest, this.objectMapper, phoneNumber, token);
     }
 
-    public PendingAccountRegistration save(AccountRegistrationRequest accountRegistrationRequest) {
+    public PendingAccountRegistration save(AccountRegistrationRequest accountRegistrationRequest) throws JsonProcessingException {
         Optional<Account> duplicateAccount = this.accountRepository.findByPhoneNumber(
                 accountRegistrationRequest.getPhoneNumber());
 
@@ -124,10 +133,14 @@ public class PendingAccountRegistrationService {
                             })).start();
 
                             return pendingAccountRegistration;
-                        } else throw new TownAndCityMismatchException(accountRegistrationRequest);
-                    } else throw new NoSuchTownException(accountRegistrationRequest);
-                } else throw new NoSuchCityException(accountRegistrationRequest);
+                        } else
+                            throw new TownAndCityMismatchException(this.messageSource, this.httpServletRequest, this.objectMapper, accountRegistrationRequest);
+                    } else
+                        throw new NoSuchTownException(this.messageSource, this.httpServletRequest, this.objectMapper, accountRegistrationRequest);
+                } else
+                    throw new NoSuchCityException(this.messageSource, this.httpServletRequest, this.objectMapper, accountRegistrationRequest);
             }
-        } else throw new PhoneNumberAlreadyExistsException(accountRegistrationRequest);
+        } else
+            throw new PhoneNumberAlreadyExistsException(this.messageSource, this.httpServletRequest, this.objectMapper, accountRegistrationRequest);
     }
 }

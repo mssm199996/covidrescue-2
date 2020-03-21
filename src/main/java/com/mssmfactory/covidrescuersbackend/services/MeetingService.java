@@ -1,5 +1,7 @@
 package com.mssmfactory.covidrescuersbackend.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Meeting;
 import com.mssmfactory.covidrescuersbackend.dto.DetailedMeetingResponse;
@@ -8,9 +10,11 @@ import com.mssmfactory.covidrescuersbackend.exceptions.NoSuchAccountException;
 import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.MeetingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +32,16 @@ public class MeetingService {
     @Autowired
     private SequenceService sequenceService;
 
-    public Meeting save(Account triggerer, MeetingRequest meetingRequest) {
+    @Autowired
+    private HttpServletRequest httpServletRequest;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private MessageSource messageSource;
+
+    public Meeting save(Account triggerer, MeetingRequest meetingRequest) throws JsonProcessingException {
         Optional<Account> targetedAccount = this.accountRepository.findByPhoneNumber(meetingRequest.getTargetAccountPhoneNumber());
 
         if (targetedAccount.isPresent()) {
@@ -53,20 +66,22 @@ public class MeetingService {
             this.incrementNumberOfMeetings(targeted);
 
             return meeting;
-        } else throw new NoSuchAccountException(meetingRequest.getTargetAccountPhoneNumber());
+        } else throw new NoSuchAccountException(this.messageSource, this.httpServletRequest, this.objectMapper,
+                meetingRequest.getTargetAccountPhoneNumber());
     }
 
     // -----------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------
 
-    public List<DetailedMeetingResponse> findDetailedMeetingsByTriggeredOrTarget(Long accountId) {
+    public List<DetailedMeetingResponse> findDetailedMeetingsByTriggeredOrTarget(Long accountId) throws JsonProcessingException {
         Optional<Account> accountOptional = this.accountRepository.findById(accountId);
 
         if (accountOptional.isPresent()) {
             Account account = accountOptional.get();
 
             return this.findDetailedMeetingsByTriggeredOrTarget(account);
-        } else throw new NoSuchAccountException(accountId);
+        } else
+            throw new NoSuchAccountException(this.messageSource, this.httpServletRequest, this.objectMapper, accountId);
     }
 
     public List<DetailedMeetingResponse> findDetailedMeetingsByTriggeredOrTarget(Account account) {

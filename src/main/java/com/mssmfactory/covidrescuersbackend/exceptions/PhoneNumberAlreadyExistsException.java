@@ -1,11 +1,18 @@
 package com.mssmfactory.covidrescuersbackend.exceptions;
 
-import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mssmfactory.covidrescuersbackend.dto.AccountRegistrationRequest;
+import org.springframework.context.MessageSource;
 
-public class PhoneNumberAlreadyExistsException extends RuntimeException {
+import javax.servlet.http.HttpServletRequest;
 
-    public PhoneNumberAlreadyExistsException(AccountRegistrationRequest accountRegistrationRequest) {
-        super("The phone number: " + accountRegistrationRequest.getPhoneNumber() + " has already been used.");
+public class PhoneNumberAlreadyExistsException extends AppRuntimeException {
+
+    public PhoneNumberAlreadyExistsException(MessageSource messageSource, HttpServletRequest httpServletRequest, ObjectMapper objectMapper,
+                                             AccountRegistrationRequest accountRegistrationRequest) throws JsonProcessingException {
+
+        super(messageSource, httpServletRequest, objectMapper, "error.phone-number-already-exists.content"
+                , new String[]{accountRegistrationRequest.getPhoneNumber()}, new String[]{"phoneNumber"});
     }
 }

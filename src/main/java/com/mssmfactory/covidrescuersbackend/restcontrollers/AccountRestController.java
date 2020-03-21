@@ -1,5 +1,6 @@
 package com.mssmfactory.covidrescuersbackend.restcontrollers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
 import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
 import com.mssmfactory.covidrescuersbackend.services.AccountService;
@@ -63,7 +64,7 @@ public class AccountRestController {
 
     @PatchMapping("updateAccountState/{accountId}")
     public ResponseEntity updateAccountState(@PathVariable("accountId") Long accountId,
-                                             @RequestParam("accountState") Account.AccountState accountState) {
+                                             @RequestParam("accountState") Account.AccountState accountState) throws JsonProcessingException {
         this.accountService.updateAccountState(accountId, accountState);
 
         return new ResponseEntity(HttpStatus.OK);

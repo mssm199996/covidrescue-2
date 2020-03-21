@@ -71,9 +71,7 @@ public class ApiKeyFilter extends OncePerRequestFilter {
             account.getAuthorities().add(new SimpleGrantedAuthority(this.apiRole));
         }
 
-        authentication = new UsernamePasswordAuthenticationToken(account, null,
-                account.getAuthorities());
-
+        authentication = new UsernamePasswordAuthenticationToken(account, null, account.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 

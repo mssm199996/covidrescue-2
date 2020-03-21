@@ -37,10 +37,10 @@ class CovidrescuersBackendApplicationTests {
     void fullyTestPropagation() {
         this.meetingRepository.deleteAll();
 
-        final int numberOfDays = 1;
-        final int numberOfMeetingsPerDayPerAccount = 8;
+        final int numberOfDays = 30;
+        final int numberOfMeetingsPerDayPerAccount = 10;
 
-        final int numberOfAccounts = 100;
+        final int numberOfAccounts = 1000;
         final int numberOfRelations = numberOfAccounts * numberOfMeetingsPerDayPerAccount * numberOfDays;
 
         ArrayList<Account> accounts = new ArrayList<>(numberOfAccounts);
@@ -77,7 +77,7 @@ class CovidrescuersBackendApplicationTests {
 
         System.out.println("Simulation started");
         for (Meeting meeting : orderedMeetings) {
-            System.out.println("meeting: " + meeting);
+            //System.out.println("meeting: " + meeting);
 
             Account a1 = accountMap.get(meeting.getTriggererAccountId());
             Account a2 = accountMap.get(meeting.getTargetAccountId());
@@ -96,8 +96,8 @@ class CovidrescuersBackendApplicationTests {
                CC -> Nothing
              */
 
-            System.out.println("a1: " + a1);
-            System.out.println("a2: " + a2);
+            //System.out.println("a1: " + a1);
+            //System.out.println("a2: " + a2);
 
             if (s1 == Account.AccountState.HEALTHY && s2 == Account.AccountState.SUSPECTED)
                 a1.setAccountState(Account.AccountState.SUSPECTED);
@@ -108,28 +108,28 @@ class CovidrescuersBackendApplicationTests {
             else if (s1 == Account.AccountState.CONTAMINATED && s2 == Account.AccountState.HEALTHY)
                 a2.setAccountState(Account.AccountState.SUSPECTED);
 
-            System.out.println("a1: " + a1);
-            System.out.println("a2: " + a2);
-            System.out.println("---------------------->");
+            //System.out.println("a1: " + a1);
+            //System.out.println("a2: " + a2);
+            //System.out.println("---------------------->");
         }
 
         System.out.println("Simulation finished");
         System.out.println("-----------------------------------------------------------------");
         List<Account> updatedAccounts = this.accountRepository.findAll();
 
-        for (Account account : updatedAccounts) {
+        /*for (Account account : updatedAccounts) {
             System.out.println(":=> " + account);
-        }
+        }*/
 
         for (Account account : updatedAccounts) {
             Account twinAccount = accountMap.get(account.getId());
 
             if (twinAccount != null) {
-                System.out.println("Account: " + account);
-                System.out.println("Twin Account: " + twinAccount);
+                //System.out.println("Account: " + account);
+                //System.out.println("Twin Account: " + twinAccount);
 
                 assert account.getAccountState().equals(twinAccount.getAccountState());
-                System.out.println("------------------------------------------------");
+                //System.out.println("------------------------------------------------");
             }
         }
     }

@@ -1,12 +1,18 @@
 package com.mssmfactory.covidrescuersbackend.exceptions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Notification;
+import org.springframework.context.MessageSource;
 
-public class NotYourNotificationException extends RuntimeException {
+import javax.servlet.http.HttpServletRequest;
 
-    public NotYourNotificationException(Account account, Notification notification) {
-        super("The account: " + account.getId() + " has no right on the notification: " +
-                notification.getId());
+public class NotYourNotificationException extends AppRuntimeException {
+
+    public NotYourNotificationException(MessageSource messageSource, HttpServletRequest httpServletRequest, ObjectMapper objectMapper,
+                                        Account account, Notification notification) throws JsonProcessingException {
+
+        super(messageSource, httpServletRequest, objectMapper, "error.not-your-notification.content", null, null);
     }
 }

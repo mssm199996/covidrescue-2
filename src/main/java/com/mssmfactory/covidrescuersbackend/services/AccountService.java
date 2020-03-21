@@ -1,5 +1,7 @@
 package com.mssmfactory.covidrescuersbackend.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
 import com.mssmfactory.covidrescuersbackend.domainmodel.AccountPosition;
 import com.mssmfactory.covidrescuersbackend.domainmodel.PendingAccountRegistration;
@@ -8,11 +10,13 @@ import com.mssmfactory.covidrescuersbackend.repositories.AccountPositionReposito
 import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
 import com.mssmfactory.covidrescuersbackend.utils.SuspectionPropagationHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +38,15 @@ public class AccountService {
 
     @Autowired
     private SequenceService sequenceService;
+
+    @Autowired
+    private HttpServletRequest httpServletRequest;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private MessageSource messageSource;
 
     public Account findLoggedInAccount() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -96,7 +109,7 @@ public class AccountService {
         this.accountRepository.save(account);
     }
 
-    public void updateAccountState(Long accountId, Account.AccountState accountState) {
+    public void updateAccountState(Long accountId, Account.AccountState accountState) throws JsonProcessingException {
         Optional<Account> accountOptional = this.accountRepository.findById(accountId);
 
         if (accountOptional.isPresent()) {
@@ -126,7 +139,7 @@ public class AccountService {
                     this.propagateOnContaminated(account.getId());
                 })).start();
             }
-        } else throw new NoSuchAccountException(accountId);
+        } else throw new NoSuchAccountException(this.messageSource, this.httpServletRequest, this.objectMapper, accountId);
     }
 
     public synchronized void propagateOnContaminated(Long contaminatedAccountId) {

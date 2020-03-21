@@ -1,5 +1,7 @@
 package com.mssmfactory.covidrescuersbackend.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Notification;
 import com.mssmfactory.covidrescuersbackend.dto.NotificationResponse;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -24,9 +27,15 @@ public class NotificationService {
     private NotificationRepository notificationRepository;
 
     @Autowired
+    private HttpServletRequest httpServletRequest;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private MessageSource messageSource;
 
-    public void updateNotificationMark(Account account, Long notificationId, boolean marked) {
+    public void updateNotificationMark(Account account, Long notificationId, boolean marked) throws JsonProcessingException {
         Optional<Notification> notificationOptional = this.notificationRepository.findById(notificationId);
 
         if (notificationOptional.isPresent()) {
@@ -36,8 +45,10 @@ public class NotificationService {
                 notification.setMarked(marked);
 
                 this.notificationRepository.save(notification);
-            } else throw new NotYourNotificationException(account, notification);
-        } else throw new NoSuchNotificationException(notificationId);
+            } else
+                throw new NotYourNotificationException(this.messageSource, this.httpServletRequest, this.objectMapper, account, notification);
+        } else
+            throw new NoSuchNotificationException(this.messageSource, this.httpServletRequest, this.objectMapper, notificationId);
     }
 
     // ---------------------------------------------------------------------------------------------------

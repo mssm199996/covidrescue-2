@@ -1,5 +1,7 @@
 package com.mssmfactory.covidrescuersbackend.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
 import com.mssmfactory.covidrescuersbackend.domainmodel.City;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Town;
@@ -10,8 +12,10 @@ import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.CityRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.TownRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +31,15 @@ public class DataAnalysisService {
 
     @Autowired
     private TownRepository townRepository;
+
+    @Autowired
+    private HttpServletRequest httpServletRequest;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private MessageSource messageSource;
 
     public List<CityStateCountResponse> findAllCityStateCount() {
         List<City> cityList = this.cityRepository.findAll();
@@ -50,7 +63,7 @@ public class DataAnalysisService {
         return result;
     }
 
-    public List<TownStateCountResponse> findAllTownStateCountByCityId(Integer cityId) {
+    public List<TownStateCountResponse> findAllTownStateCountByCityId(Integer cityId) throws JsonProcessingException {
         Optional<City> cityOptional = this.cityRepository.findById(cityId);
 
         if (cityOptional.isPresent()) {
@@ -76,6 +89,6 @@ public class DataAnalysisService {
             }
 
             return result;
-        } else throw new NoSuchCityException(cityId);
+        } else throw new NoSuchCityException(this.messageSource, this.httpServletRequest, this.objectMapper, cityId);
     }
 }
