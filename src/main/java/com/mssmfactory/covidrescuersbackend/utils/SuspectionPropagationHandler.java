@@ -34,6 +34,8 @@ public class SuspectionPropagationHandler {
                     parentAccountId, parentAccountId, parentToChildRelation.getMoment());
         }
 
+        System.out.println("visitedMeetings: " + visitedMeetings.size());
+
         for (Meeting meeting : meetingList) {
             System.out.println("meeting: " + meeting);
 

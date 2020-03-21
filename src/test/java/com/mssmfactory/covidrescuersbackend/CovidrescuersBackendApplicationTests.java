@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @SpringBootTest
 class CovidrescuersBackendApplicationTests {
@@ -34,6 +35,8 @@ class CovidrescuersBackendApplicationTests {
 
     @Test
     void fullyTestPropagation() {
+        this.meetingRepository.deleteAll();
+
         final int numberOfDays = 1;
         final int numberOfMeetingsPerDayPerAccount = 3;
 

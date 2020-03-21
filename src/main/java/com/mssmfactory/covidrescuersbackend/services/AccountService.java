@@ -131,6 +131,7 @@ public class AccountService {
 
     public synchronized void propagateOnContaminated(Long contaminatedAccountId) {
         Set<Long> accountsIdsToUpdate = this.suspectionPropagationHandler.propagate(contaminatedAccountId);
+        accountsIdsToUpdate.remove(contaminatedAccountId);
 
         if (!accountsIdsToUpdate.isEmpty()) {
             Iterable<Account> accountsToUpdate = this.accountRepository.findAllById(accountsIdsToUpdate);
