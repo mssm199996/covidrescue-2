@@ -31,7 +31,7 @@ public class SecurityAuthenticationSuccessHandler implements AuthenticationSucce
                 case USER:
                     break;
                 case DEV:
-                    httpServletResponse.sendRedirect("/wagger-ui.html");
+                    httpServletResponse.sendRedirect("/swagger-ui.html");
                     break;
                 case API:
                     break;
