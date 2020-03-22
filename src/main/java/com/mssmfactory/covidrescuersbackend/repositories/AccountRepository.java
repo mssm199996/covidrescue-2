@@ -20,4 +20,6 @@ public interface AccountRepository extends MongoRepository<Account, Long> {
     Long countAllByTownIdAndAccountState(Integer townId, Account.AccountState accountState);
 
     List<Account> findAllByAccountStateAndIdIn(Account.AccountState accountState, Set<Long> ids);
+
+    List<Account> findAllByPhoneNumberStartingWith(String phoneNumber);
 }
