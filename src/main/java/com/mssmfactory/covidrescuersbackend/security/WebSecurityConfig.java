@@ -111,7 +111,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers(
                         "/account/findAll",
-                        "/account/findAllByPhoneNumberStartingWith",
+                        "/account/findAllByPhoneNumberStartingWith**",
                         "/account/findByPhoneNumber",
                         "/account/updateAccountState/**",
                         "/meeting/findDetailedMeetings/**")
