@@ -37,7 +37,7 @@ public class SuspectionPropagationHandler {
 
         for (Meeting meeting : meetingList) {
             if (!visitedMeetingIds.contains(meeting.getId())) {
-                Long partnerId = meeting.getTriggererAccountId() == parentAccountId ?
+                Long partnerId = meeting.getTriggererAccountId().equals(parentAccountId) ?
                         meeting.getTargetAccountId() :
                         meeting.getTriggererAccountId();
 

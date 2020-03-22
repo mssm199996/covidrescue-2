@@ -44,6 +44,7 @@ public class Account implements UserDetails {
     private String phoneNumber;
 
     @NotNull
+    @JsonIgnore
     private AccountRole accountRole;
 
     @NotNull
@@ -61,6 +62,7 @@ public class Account implements UserDetails {
     private GeoJsonPoint position;
 
     @Transient
+    @JsonIgnore
     private Set<SimpleGrantedAuthority> authorities = new HashSet<>();
 
     @Override
@@ -88,21 +90,25 @@ public class Account implements UserDetails {
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return true;
     }

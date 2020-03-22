@@ -139,7 +139,8 @@ public class AccountService {
                     this.propagateOnContaminated(account.getId());
                 })).start();
             }
-        } else throw new NoSuchAccountException(this.messageSource, this.httpServletRequest, this.objectMapper, accountId);
+        } else
+            throw new NoSuchAccountException(this.messageSource, this.httpServletRequest, this.objectMapper, accountId);
     }
 
     public synchronized void propagateOnContaminated(Long contaminatedAccountId) {
@@ -147,7 +148,8 @@ public class AccountService {
         accountsIdsToUpdate.remove(contaminatedAccountId);
 
         if (!accountsIdsToUpdate.isEmpty()) {
-            Iterable<Account> accountsToUpdate = this.accountRepository.findAllById(accountsIdsToUpdate);
+            Iterable<Account> accountsToUpdate = this.accountRepository.
+                    findAllByAccountStateAndIdIn(Account.AccountState.HEALTHY, accountsIdsToUpdate);
 
             for (Account account : accountsToUpdate) {
                 account.setAccountState(Account.AccountState.SUSPECTED);

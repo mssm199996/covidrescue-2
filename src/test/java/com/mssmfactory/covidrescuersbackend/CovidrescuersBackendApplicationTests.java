@@ -34,13 +34,24 @@ class CovidrescuersBackendApplicationTests {
     }
 
     @Test
+    void fullyTextPropagationNTimes() {
+        final int times = 10;
+
+        for (int i = 0; i < times; i++) {
+            System.out.println("test n° = " + i + " started !");
+            this.fullyTestPropagation();
+            System.out.println("test n° = " + i + " finished !");
+        }
+    }
+
+    @Test
     void fullyTestPropagation() {
         this.meetingRepository.deleteAll();
 
-        final int numberOfDays = 30;
-        final int numberOfMeetingsPerDayPerAccount = 10;
+        final int numberOfDays = 1;
+        final int numberOfMeetingsPerDayPerAccount = 8;
 
-        final int numberOfAccounts = 1000;
+        final int numberOfAccounts = 100;
         final int numberOfRelations = numberOfAccounts * numberOfMeetingsPerDayPerAccount * numberOfDays;
 
         ArrayList<Account> accounts = new ArrayList<>(numberOfAccounts);
@@ -65,17 +76,17 @@ class CovidrescuersBackendApplicationTests {
         Account contaminatedAccount = this.pickRandomAccount(accounts, null);
         contaminatedAccount.setAccountState(Account.AccountState.CONTAMINATED);
 
-        System.out.println("Contaminated account: " + contaminatedAccount.getId());
+        //System.out.println("Contaminated account: " + contaminatedAccount.getId());
         this.accountRepository.save(contaminatedAccount);
 
-        System.out.println("Propagation started");
+        //System.out.println("Propagation started");
         this.accountService.propagateOnContaminated(contaminatedAccount.getId());
-        System.out.println("Propagation finished");
+        //System.out.println("Propagation finished");
 
         List<Meeting> orderedMeetings = meetings.stream().sorted(Comparator.comparing(Meeting::getMoment))
                 .collect(Collectors.toList());
 
-        System.out.println("Simulation started");
+        //System.out.println("Simulation started");
         for (Meeting meeting : orderedMeetings) {
             //System.out.println("meeting: " + meeting);
 
@@ -113,13 +124,9 @@ class CovidrescuersBackendApplicationTests {
             //System.out.println("---------------------->");
         }
 
-        System.out.println("Simulation finished");
-        System.out.println("-----------------------------------------------------------------");
+        //System.out.println("Simulation finished");
+        //System.out.println("-----------------------------------------------------------------");
         List<Account> updatedAccounts = this.accountRepository.findAll();
-
-        /*for (Account account : updatedAccounts) {
-            System.out.println(":=> " + account);
-        }*/
 
         for (Account account : updatedAccounts) {
             Account twinAccount = accountMap.get(account.getId());
