@@ -159,4 +159,15 @@ public class AccountService {
             }
         }
     }
+
+    // ------------------------------------------------------------------------------------------
+
+    public void deleteByPhoneNumber(String phoneNumber) throws JsonProcessingException {
+        Optional<Account> accountOptional = this.accountRepository.findByPhoneNumber(phoneNumber);
+
+        if (accountOptional.isPresent()) {
+            this.accountRepository.delete(accountOptional.get());
+        } else throw new NoSuchAccountException(
+                this.messageSource, this.httpServletRequest, this.objectMapper, phoneNumber);
+    }
 }

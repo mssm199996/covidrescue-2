@@ -22,4 +22,6 @@ public interface AccountRepository extends MongoRepository<Account, Long> {
     List<Account> findAllByAccountStateAndIdIn(Account.AccountState accountState, Set<Long> ids);
 
     List<Account> findAllByPhoneNumberStartingWith(String phoneNumber);
+
+
 }

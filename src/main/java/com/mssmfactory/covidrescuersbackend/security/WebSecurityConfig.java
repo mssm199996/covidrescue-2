@@ -104,7 +104,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers(
                         "/accountPosition/findAll",
-                        "/pendingAccountRegistration/findAll")
+                        "/pendingAccountRegistration/findAll",
+
+                        "/account/deleteByPhoneNumber**")
                 .hasAuthority(WebSecurityConfig.DEV_ROLE)
 
                 // -----------------------------------------------------------------------------------------------------

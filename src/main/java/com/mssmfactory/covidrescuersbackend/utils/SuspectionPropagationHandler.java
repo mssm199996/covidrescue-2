@@ -18,12 +18,30 @@ public class SuspectionPropagationHandler {
     public Set<Long> propagate(Long parentAccountId) {
         Set<Long> result = new HashSet<>();
 
-        this.propagate(parentAccountId, null, result, new HashSet<>());
+        /*this.propagate(parentAccountId, null, result, new HashSet<>());*/
+
+        this.propagate(parentAccountId, result);
 
         return result;
     }
 
-    private void propagate(Long parentAccountId, Meeting parentToChildRelation, Set<Long> accountsToUpdateIds,
+    private void propagate(Long parentAccountId, Set<Long> accountsToUpdateIds) {
+        List<Meeting> meetingList;
+
+        meetingList = this.meetingRepository.findByTriggererAccountIdOrTargetAccountId(parentAccountId,
+                parentAccountId);
+
+        for (Meeting meeting : meetingList) {
+            Long partnerId = meeting.getTriggererAccountId().equals(parentAccountId) ?
+                    meeting.getTargetAccountId() :
+                    meeting.getTriggererAccountId();
+
+            // Mark this account as treated
+            accountsToUpdateIds.add(partnerId);
+        }
+    }
+
+    /*private void propagate(Long parentAccountId, Meeting parentToChildRelation, Set<Long> accountsToUpdateIds,
                            Set<Long> visitedMeetingIds) {
         List<Meeting> meetingList;
 
@@ -48,5 +66,5 @@ public class SuspectionPropagationHandler {
                 this.propagate(partnerId, meeting, accountsToUpdateIds, visitedMeetingIds);
             }
         }
-    }
+    }*/
 }

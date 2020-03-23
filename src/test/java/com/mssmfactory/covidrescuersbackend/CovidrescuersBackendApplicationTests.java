@@ -48,7 +48,7 @@ class CovidrescuersBackendApplicationTests {
     void fullyTestPropagation() {
         this.meetingRepository.deleteAll();
 
-        final int numberOfDays = 1;
+        final int numberOfDays = 5;
         final int numberOfMeetingsPerDayPerAccount = 8;
 
         final int numberOfAccounts = 100;
@@ -76,17 +76,17 @@ class CovidrescuersBackendApplicationTests {
         Account contaminatedAccount = this.pickRandomAccount(accounts, null);
         contaminatedAccount.setAccountState(Account.AccountState.CONTAMINATED);
 
-        //System.out.println("Contaminated account: " + contaminatedAccount.getId());
+        System.out.println("Contaminated account: " + contaminatedAccount.getId());
         this.accountRepository.save(contaminatedAccount);
 
-        //System.out.println("Propagation started");
+        System.out.println("Propagation started");
         this.accountService.propagateOnContaminated(contaminatedAccount.getId());
-        //System.out.println("Propagation finished");
+        System.out.println("Propagation finished");
 
         List<Meeting> orderedMeetings = meetings.stream().sorted(Comparator.comparing(Meeting::getMoment))
                 .collect(Collectors.toList());
 
-        //System.out.println("Simulation started");
+        System.out.println("Simulation started");
         for (Meeting meeting : orderedMeetings) {
             //System.out.println("meeting: " + meeting);
 
@@ -110,33 +110,36 @@ class CovidrescuersBackendApplicationTests {
             //System.out.println("a1: " + a1);
             //System.out.println("a2: " + a2);
 
-            if (s1 == Account.AccountState.HEALTHY && s2 == Account.AccountState.SUSPECTED)
-                a1.setAccountState(Account.AccountState.SUSPECTED);
-            else if (s1 == Account.AccountState.HEALTHY && s2 == Account.AccountState.CONTAMINATED)
-                a1.setAccountState(Account.AccountState.SUSPECTED);
-            else if (s1 == Account.AccountState.SUSPECTED && s2 == Account.AccountState.HEALTHY)
-                a2.setAccountState(Account.AccountState.SUSPECTED);
-            else if (s1 == Account.AccountState.CONTAMINATED && s2 == Account.AccountState.HEALTHY)
-                a2.setAccountState(Account.AccountState.SUSPECTED);
+            if (a1.equals(contaminatedAccount) || a2.equals(contaminatedAccount)) {
+                System.out.println("treating the fucking: " + meeting);
 
+                if (s1 == Account.AccountState.HEALTHY && s2 == Account.AccountState.SUSPECTED)
+                    a1.setAccountState(Account.AccountState.SUSPECTED);
+                else if (s1 == Account.AccountState.HEALTHY && s2 == Account.AccountState.CONTAMINATED)
+                    a1.setAccountState(Account.AccountState.SUSPECTED);
+                else if (s1 == Account.AccountState.SUSPECTED && s2 == Account.AccountState.HEALTHY)
+                    a2.setAccountState(Account.AccountState.SUSPECTED);
+                else if (s1 == Account.AccountState.CONTAMINATED && s2 == Account.AccountState.HEALTHY)
+                    a2.setAccountState(Account.AccountState.SUSPECTED);
+            }
             //System.out.println("a1: " + a1);
             //System.out.println("a2: " + a2);
             //System.out.println("---------------------->");
         }
 
-        //System.out.println("Simulation finished");
-        //System.out.println("-----------------------------------------------------------------");
+        System.out.println("Simulation finished");
+        System.out.println("-----------------------------------------------------------------");
         List<Account> updatedAccounts = this.accountRepository.findAll();
 
         for (Account account : updatedAccounts) {
             Account twinAccount = accountMap.get(account.getId());
 
             if (twinAccount != null) {
-                //System.out.println("Account: " + account);
-                //System.out.println("Twin Account: " + twinAccount);
+                System.out.println("Account: " + account);
+                System.out.println("Twin Account: " + twinAccount);
 
                 assert account.getAccountState().equals(twinAccount.getAccountState());
-                //System.out.println("------------------------------------------------");
+                System.out.println("------------------------------------------------");
             }
         }
     }

@@ -82,4 +82,12 @@ public class AccountRestController {
         if (account != null)
             this.accountService.updateAccountPosition(account, longitude, latitude);
     }
+
+    // ----------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------
+
+    @DeleteMapping("deleteByPhoneNumber")
+    public void deleteByPhoneNumber(@RequestParam("phoneNumber") String phoneNumber) throws JsonProcessingException {
+        this.accountService.deleteByPhoneNumber(phoneNumber);
+    }
 }
