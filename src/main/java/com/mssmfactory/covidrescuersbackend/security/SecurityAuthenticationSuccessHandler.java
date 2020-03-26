@@ -13,14 +13,17 @@ import java.io.IOException;
 public class SecurityAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private ObjectMapper objectMapper;
+    private Integer sessionInactivityTimeout;
 
-    public SecurityAuthenticationSuccessHandler(ObjectMapper objectMapper) {
+    public SecurityAuthenticationSuccessHandler(ObjectMapper objectMapper, Integer sessionInactivityTimeout) {
         this.objectMapper = objectMapper;
+        this.sessionInactivityTimeout = sessionInactivityTimeout;
     }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) {
         try {
+            httpServletRequest.getSession().setMaxInactiveInterval(this.sessionInactivityTimeout);
             Account account = Account.class.cast(authentication.getPrincipal());
             String accountAsString = this.objectMapper.writeValueAsString(account);
             httpServletResponse.addHeader("Account", accountAsString);
