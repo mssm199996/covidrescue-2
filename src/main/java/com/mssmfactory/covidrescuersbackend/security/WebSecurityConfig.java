@@ -167,7 +167,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         WebSecurityConfig.DEV_ROLE,
                         WebSecurityConfig.ADMIN_ROLE,
                         WebSecurityConfig.API_ROLE,
-                        WebSecurityConfig.OPEN_API_ROLE
+                        WebSecurityConfig.OPEN_API_ROLE,
+                        WebSecurityConfig.USER_ROLE
                 )
 
 
