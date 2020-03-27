@@ -7,12 +7,12 @@ import org.springframework.context.MessageSource;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class PhoneNumberAlreadyExistsException extends AppRuntimeException {
+public class EmailAlreadyExistsException extends AppRuntimeException {
 
-    public PhoneNumberAlreadyExistsException(MessageSource messageSource, HttpServletRequest httpServletRequest, ObjectMapper objectMapper,
-                                             AccountRegistrationRequest accountRegistrationRequest) throws JsonProcessingException {
+    public EmailAlreadyExistsException(MessageSource messageSource, HttpServletRequest httpServletRequest, ObjectMapper objectMapper,
+                                       AccountRegistrationRequest accountRegistrationRequest) throws JsonProcessingException {
 
-        super(messageSource, httpServletRequest, objectMapper, "error.phone-number-already-exists.content"
-                , new String[]{accountRegistrationRequest.getPhoneNumber()}, new String[]{"phoneNumber"});
+        super(messageSource, httpServletRequest, objectMapper, "error.email-already-exists.content"
+                , new String[]{accountRegistrationRequest.getEmail()}, new String[]{"email"});
     }
 }

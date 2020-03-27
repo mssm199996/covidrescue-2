@@ -42,9 +42,9 @@ public class PendingAccountRegistrationRestController {
     }
 
     @DeleteMapping
-    private Account delete(@RequestParam("phoneNumber") String phoneNumber, @RequestParam("token") String token) throws JsonProcessingException {
+    private Account delete(@RequestParam("email") String email, @RequestParam("token") String token) throws JsonProcessingException {
         this.rateLimiter.acquire();
 
-        return this.pendingAccountRegistrationService.delete(phoneNumber, token);
+        return this.pendingAccountRegistrationService.delete(email, token);
     }
 }

@@ -10,8 +10,8 @@ public class NoSuchAccountException extends AppRuntimeException {
 
     public NoSuchAccountException(MessageSource messageSource, HttpServletRequest httpServletRequest,
                                   ObjectMapper objectMapper, String phoneNumber) throws JsonProcessingException {
-        super(messageSource, httpServletRequest, objectMapper, "error.no-such-account-phone-number.content",
-                new String[]{phoneNumber}, new String[]{"phoneNumber"});
+        super(messageSource, httpServletRequest, objectMapper, "error.no-such-account-email.content",
+                new String[]{phoneNumber}, new String[]{"email"});
     }
 
     public NoSuchAccountException(MessageSource messageSource, HttpServletRequest httpServletRequest,

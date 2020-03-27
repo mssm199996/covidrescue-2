@@ -27,9 +27,9 @@ public class AccountRestController {
         return this.accountRepository.findAll();
     }
 
-    @GetMapping("findAllByPhoneNumberStartingWith")
-    public List<Account> findAllByPhoneNumberStartingWith(@RequestParam("phoneNumber") String phoneNumber) {
-        return this.accountRepository.findAllByPhoneNumberStartingWith(phoneNumber);
+    @GetMapping("findAllByEmailStartingWith")
+    public List<Account> findAllByPhoneNumberStartingWith(@RequestParam("email") String email) {
+        return this.accountRepository.findAllByEmailStartingWith(email);
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -44,18 +44,18 @@ public class AccountRestController {
         return this.accountService.findLoggedInAccount();
     }
 
-    @GetMapping("findByPhoneNumber")
-    public Account findByPhoneNumber(@RequestParam("phoneNumber") String phoneNumber) {
-        Optional<Account> accountOptional = this.accountRepository.findByPhoneNumber(phoneNumber);
+    @GetMapping("findByEmail")
+    public Account findByPhoneNumber(@RequestParam("email") String email) {
+        Optional<Account> accountOptional = this.accountRepository.findByEmail(email);
 
         if (accountOptional.isPresent())
             return accountOptional.get();
         else return null;
     }
 
-    @GetMapping("findStateByPhoneNumber")
-    public Account.AccountState findStateByPhoneNumber(@RequestParam("phoneNumber") String phoneNumber) {
-        Optional<Account> accountOptional = this.accountRepository.findByPhoneNumber(phoneNumber);
+    @GetMapping("findStateByEmail")
+    public Account.AccountState findStateByPhoneNumber(@RequestParam("email") String email) {
+        Optional<Account> accountOptional = this.accountRepository.findByEmail(email);
 
         if (accountOptional.isPresent())
             return accountOptional.get().getAccountState();
@@ -86,8 +86,8 @@ public class AccountRestController {
     // ----------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------
 
-    @DeleteMapping("deleteByPhoneNumber")
-    public void deleteByPhoneNumber(@RequestParam("phoneNumber") String phoneNumber) throws JsonProcessingException {
-        this.accountService.deleteByPhoneNumber(phoneNumber);
+    @DeleteMapping("deleteByEmail")
+    public void deleteByEmail(@RequestParam("email") String email) throws JsonProcessingException {
+        this.accountService.deleteByEmail(email);
     }
 }

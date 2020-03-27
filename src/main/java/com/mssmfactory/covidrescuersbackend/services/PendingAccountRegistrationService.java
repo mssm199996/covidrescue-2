@@ -12,7 +12,7 @@ import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.CityRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.PendingAccountRegistrationRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.TownRepository;
-import com.mssmfactory.covidrescuersbackend.utils.SMSHandler;
+import com.mssmfactory.covidrescuersbackend.utils.communication.EmailHandler;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -48,7 +48,7 @@ public class PendingAccountRegistrationService {
     private SequenceService sequenceService;
 
     @Autowired
-    private SMSHandler smsHandler;
+    private EmailHandler emailHandler;
 
     @Autowired
     private HttpServletRequest httpServletRequest;
@@ -60,11 +60,11 @@ public class PendingAccountRegistrationService {
     private MessageSource messageSource;
 
     RandomStringGenerator tokensGenerator = new RandomStringGenerator.Builder()
-            .withinRange('0', '1').build();
+            .withinRange('0', '9').build();
 
-    public Account delete(String phoneNumber, String token) throws JsonProcessingException {
+    public Account delete(String email, String token) throws JsonProcessingException {
         Optional<PendingAccountRegistration> pendingAccountRegistrationOptional =
-                this.pendingAccountRegistrationRepository.findByPhoneNumberAndToken(phoneNumber, token);
+                this.pendingAccountRegistrationRepository.findByEmailAndToken(email, token);
 
         if (pendingAccountRegistrationOptional.isPresent()) {
             PendingAccountRegistration pendingAccountRegistration = pendingAccountRegistrationOptional.get();
@@ -77,20 +77,20 @@ public class PendingAccountRegistrationService {
 
             return account;
         } else
-            throw new NoSuchPendingAccountRegistration(this.messageSource, this.httpServletRequest, this.objectMapper, phoneNumber, token);
+            throw new NoSuchPendingAccountRegistration(this.messageSource, this.httpServletRequest, this.objectMapper, email, token);
     }
 
     public PendingAccountRegistration save(AccountRegistrationRequest accountRegistrationRequest) throws JsonProcessingException {
-        Optional<Account> duplicateAccount = this.accountRepository.findByPhoneNumber(
-                accountRegistrationRequest.getPhoneNumber());
+        Optional<Account> duplicateAccount = this.accountRepository.findByEmail(
+                accountRegistrationRequest.getEmail());
 
         if (!duplicateAccount.isPresent()) {
             Locale locale = this.httpServletRequest.getLocale();
             String token = this.tokensGenerator.generate(6);
 
             Optional<PendingAccountRegistration> pendingAccountRegistrationOptional =
-                    this.pendingAccountRegistrationRepository.findByPhoneNumber(
-                            accountRegistrationRequest.getPhoneNumber());
+                    this.pendingAccountRegistrationRepository.findByEmail(
+                            accountRegistrationRequest.getEmail());
 
             if (pendingAccountRegistrationOptional.isPresent()) {
                 PendingAccountRegistration pendingAccountRegistration = pendingAccountRegistrationOptional.get();
@@ -99,7 +99,7 @@ public class PendingAccountRegistrationService {
                 this.pendingAccountRegistrationRepository.save(pendingAccountRegistration);
 
                 (new Thread(() -> {
-                    this.smsHandler.sendRegistrationConfirmationSms(pendingAccountRegistration, locale);
+                    this.emailHandler.sendRegistrationConfirmationEmail(pendingAccountRegistration, locale);
                 })).start();
 
                 return pendingAccountRegistration;
@@ -115,21 +115,20 @@ public class PendingAccountRegistrationService {
 
                         if (town.getCityId().equals(city.getId())) {
                             PendingAccountRegistration pendingAccountRegistration = new PendingAccountRegistration();
-                            pendingAccountRegistration.setPhoneNumber(accountRegistrationRequest.getPhoneNumber());
+                            pendingAccountRegistration.setEmail(accountRegistrationRequest.getEmail());
                             pendingAccountRegistration.setToken(token);
                             pendingAccountRegistration.setCityId(accountRegistrationRequest.getCityId());
                             pendingAccountRegistration.setFirstName(accountRegistrationRequest.getFirstName());
                             pendingAccountRegistration.setFamillyName(accountRegistrationRequest.getFamillyName());
                             pendingAccountRegistration.setId(this.sequenceService.getNextValue(PendingAccountRegistration.SEQUENCE_ID));
                             pendingAccountRegistration.setPassword(this.passwordEncoder.encode(accountRegistrationRequest.getPassword()));
-                            pendingAccountRegistration.setPhoneNumber(accountRegistrationRequest.getPhoneNumber());
                             pendingAccountRegistration.setTownId(accountRegistrationRequest.getTownId());
 
                             this.pendingAccountRegistrationRepository.save(pendingAccountRegistration);
                             this.sequenceService.setNextValue(PendingAccountRegistration.SEQUENCE_ID);
 
                             (new Thread(() -> {
-                                this.smsHandler.sendRegistrationConfirmationSms(pendingAccountRegistration, locale);
+                                this.emailHandler.sendRegistrationConfirmationEmail(pendingAccountRegistration, locale);
                             })).start();
 
                             return pendingAccountRegistration;
@@ -141,6 +140,6 @@ public class PendingAccountRegistrationService {
                     throw new NoSuchCityException(this.messageSource, this.httpServletRequest, this.objectMapper, accountRegistrationRequest);
             }
         } else
-            throw new PhoneNumberAlreadyExistsException(this.messageSource, this.httpServletRequest, this.objectMapper, accountRegistrationRequest);
+            throw new EmailAlreadyExistsException(this.messageSource, this.httpServletRequest, this.objectMapper, accountRegistrationRequest);
     }
 }

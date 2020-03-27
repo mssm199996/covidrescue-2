@@ -42,7 +42,7 @@ public class MeetingService {
     private MessageSource messageSource;
 
     public Meeting save(Account triggerer, MeetingRequest meetingRequest) throws JsonProcessingException {
-        Optional<Account> targetedAccount = this.accountRepository.findByPhoneNumber(meetingRequest.getTargetAccountPhoneNumber());
+        Optional<Account> targetedAccount = this.accountRepository.findByEmail(meetingRequest.getTargetAccountEmail());
 
         if (targetedAccount.isPresent()) {
             Account targeted = targetedAccount.get();
@@ -67,7 +67,7 @@ public class MeetingService {
 
             return meeting;
         } else throw new NoSuchAccountException(this.messageSource, this.httpServletRequest, this.objectMapper,
-                meetingRequest.getTargetAccountPhoneNumber());
+                meetingRequest.getTargetAccountEmail());
     }
 
     // -----------------------------------------------------------------------------------------------

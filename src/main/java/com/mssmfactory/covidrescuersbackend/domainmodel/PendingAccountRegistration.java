@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -18,7 +19,11 @@ public class PendingAccountRegistration {
     private Long id;
 
     @NotNull
-    private String firstName, famillyName, phoneNumber, password, token;
+    private String firstName, famillyName, password, token;
+
+    @Email
+    @NotNull
+    private String email;
 
     @NotNull
     private Integer cityId, townId;

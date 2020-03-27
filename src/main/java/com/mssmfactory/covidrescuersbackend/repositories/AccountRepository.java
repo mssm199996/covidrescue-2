@@ -9,7 +9,7 @@ import java.util.Set;
 
 public interface AccountRepository extends MongoRepository<Account, Long> {
 
-    Optional<Account> findByPhoneNumber(String phoneNumber);
+    Optional<Account> findByEmail(String email);
 
     Optional<Account> findByUsername(String username);
 
@@ -21,7 +21,7 @@ public interface AccountRepository extends MongoRepository<Account, Long> {
 
     List<Account> findAllByAccountStateAndIdIn(Account.AccountState accountState, Set<Long> ids);
 
-    List<Account> findAllByPhoneNumberStartingWith(String phoneNumber);
+    List<Account> findAllByEmailStartingWith(String phoneNumber);
 
 
 }

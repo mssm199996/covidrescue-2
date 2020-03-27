@@ -1,4 +1,4 @@
-package com.mssmfactory.covidrescuersbackend.utils;
+package com.mssmfactory.covidrescuersbackend.utils.communication;
 
 import com.mssmfactory.covidrescuersbackend.domainmodel.PendingAccountRegistration;
 import com.twilio.Twilio;

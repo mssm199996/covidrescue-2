@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface PendingAccountRegistrationRepository extends MongoRepository<PendingAccountRegistration, Long> {
 
-    Optional<PendingAccountRegistration> findByPhoneNumber(String phoneNumber);
+    Optional<PendingAccountRegistration> findByEmail(String email);
 
-    Optional<PendingAccountRegistration> findByPhoneNumberAndToken(String phoneNumber, String token);
+    Optional<PendingAccountRegistration> findByEmailAndToken(String email, String token);
 }

@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.HashSet;
@@ -40,8 +41,9 @@ public class Account implements UserDetails {
     private String password;
 
     @NotNull
+    @Email
     @Indexed(unique = true)
-    private String phoneNumber;
+    private String email;
 
     @NotNull
     @JsonIgnore

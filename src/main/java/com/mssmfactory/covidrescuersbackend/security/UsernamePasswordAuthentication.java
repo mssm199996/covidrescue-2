@@ -37,7 +37,7 @@ public class UsernamePasswordAuthentication implements AuthenticationProvider {
             if (usernameAccountOptional.isPresent())
                 return this.getToken(usernameAccountOptional.get(), id, password);
             else {
-                Optional<Account> phoneNumberAccountOptional = this.accountRepository.findByPhoneNumber(id);
+                Optional<Account> phoneNumberAccountOptional = this.accountRepository.findByEmail(id);
 
                 if (phoneNumberAccountOptional.isPresent())
                     return this.getToken(phoneNumberAccountOptional.get(), id, password);

@@ -113,8 +113,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers(
                         "/account/findAll",
-                        "/account/findAllByPhoneNumberStartingWith**",
-                        "/account/findByPhoneNumber",
+                        "/account/findAllByEmailStartingWith**",
+                        "/account/findByEmail",
                         "/account/updateAccountState/**",
                         "/meeting/findDetailedMeetings/**")
                 .hasAnyAuthority(
@@ -141,7 +141,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers("/notification/**",
                         "/account/findLoggedInAccount",
-                        "/account/findStateByPhoneNumber",
+                        "/account/findStateByEmail",
                         "/account/updateLoggedInAccountPosition**",
 
                         "/accountPosition/findAllByLoggedInAccount")

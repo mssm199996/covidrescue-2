@@ -243,7 +243,7 @@ class CovidrescuersBackendApplicationTests {
         Account account = new Account();
         account.setId(this.nextAccount++);
         account.setUsername(name);
-        account.setPhoneNumber(UUID.randomUUID().toString());
+        account.setEmail(name + "@gmail.com");
         account.setPassword(UUID.randomUUID().toString());
         account.setAccountRole(Account.AccountRole.USER);
         account.setAccountState(Account.AccountState.HEALTHY);

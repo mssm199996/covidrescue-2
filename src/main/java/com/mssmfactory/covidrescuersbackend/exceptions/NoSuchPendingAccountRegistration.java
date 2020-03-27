@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 public class NoSuchPendingAccountRegistration extends AppRuntimeException {
 
     public NoSuchPendingAccountRegistration(MessageSource messageSource, HttpServletRequest httpServletRequest, ObjectMapper objectMapper,
-                                            String phoneNumber, String token) throws JsonProcessingException {
-        super(messageSource, httpServletRequest, objectMapper, "error.no-such-pending-account-registration.content", new String[]{phoneNumber, token}, new String[]{"phoneNumber", "token"});
+                                            String email, String token) throws JsonProcessingException {
+        super(messageSource, httpServletRequest, objectMapper, "error.no-such-pending-account-registration.content", new String[]{email, token}, new String[]{"email", "token"});
     }
 }

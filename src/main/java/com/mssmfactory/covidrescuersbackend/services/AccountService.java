@@ -70,8 +70,8 @@ public class AccountService {
 
     public Account save(PendingAccountRegistration pendingAccountRegistration) {
         Account account = new Account();
-        account.setPhoneNumber(pendingAccountRegistration.getPhoneNumber());
-        account.setUsername("User [" + pendingAccountRegistration.getPhoneNumber() + "]");
+        account.setEmail(pendingAccountRegistration.getEmail());
+        account.setUsername("User [" + pendingAccountRegistration.getEmail() + "]");
         account.setId(this.sequenceService.getNextValue(Account.SEQUENCE_ID));
         account.setFirstName(pendingAccountRegistration.getFirstName());
         account.setFamillyName(pendingAccountRegistration.getFamillyName());
@@ -162,12 +162,12 @@ public class AccountService {
 
     // ------------------------------------------------------------------------------------------
 
-    public void deleteByPhoneNumber(String phoneNumber) throws JsonProcessingException {
-        Optional<Account> accountOptional = this.accountRepository.findByPhoneNumber(phoneNumber);
+    public void deleteByEmail(String email) throws JsonProcessingException {
+        Optional<Account> accountOptional = this.accountRepository.findByEmail(email);
 
         if (accountOptional.isPresent()) {
             this.accountRepository.delete(accountOptional.get());
         } else throw new NoSuchAccountException(
-                this.messageSource, this.httpServletRequest, this.objectMapper, phoneNumber);
+                this.messageSource, this.httpServletRequest, this.objectMapper, email);
     }
 }

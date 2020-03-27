@@ -3,6 +3,7 @@ package com.mssmfactory.covidrescuersbackend.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -11,7 +12,11 @@ import javax.validation.constraints.Size;
 public class AccountRegistrationRequest {
 
     @NotNull
-    private String firstName, famillyName, phoneNumber;
+    private String firstName, famillyName;
+
+    @Email
+    @NotNull
+    private String email;
 
     @NotNull
     @Size(min = 8)

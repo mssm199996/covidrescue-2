@@ -1,17 +1,19 @@
 package com.mssmfactory.covidrescuersbackend.utils;
 
-import com.google.common.collect.ImmutableList;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
+import com.mssmfactory.covidrescuersbackend.utils.deserialization.AccountStateSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import springfox.documentation.builders.PathSelectors;
@@ -66,6 +68,14 @@ public class Configurations implements WebMvcConfigurer {
         localeChangeInterceptor.setParamName("lang");
 
         return localeChangeInterceptor;
+    }
+
+    @Bean
+    public SimpleModule customAccountDeserializer() {
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(Account.AccountState.class, new AccountStateSerializer(this.messageSource()));
+
+        return module;
     }
 
     @Override

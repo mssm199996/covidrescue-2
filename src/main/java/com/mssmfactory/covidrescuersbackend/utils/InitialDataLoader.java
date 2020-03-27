@@ -67,7 +67,7 @@ public class InitialDataLoader {
             account.setAccountState(Account.AccountState.HEALTHY);
             account.setFirstName("Covid [Dev]");
             account.setFamillyName("Rescue [Dev]");
-            account.setPhoneNumber("+213-???-??-??-??");
+            account.setEmail("dev@covidrescue.com");
             account.setTownId(null);
             account.setCityId(null);
             account.setId(-1L);
@@ -86,7 +86,7 @@ public class InitialDataLoader {
             account.setAccountState(Account.AccountState.HEALTHY);
             account.setFirstName("Covid [Admin]");
             account.setFamillyName("Rescue [Admin]");
-            account.setPhoneNumber("+213-;;;-;;-;;-;;");
+            account.setEmail("admin@covidrescue.com");
             account.setTownId(null);
             account.setCityId(null);
             account.setId(0L);
