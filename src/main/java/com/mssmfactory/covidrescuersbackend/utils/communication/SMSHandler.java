@@ -10,7 +10,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 
 @Component
@@ -34,10 +33,10 @@ public class SMSHandler {
     }
 
     public void sendRegistrationConfirmationSms(PendingAccountRegistration pendingAccountRegistration, Locale locale) {
-        String message = this.messageSource.getMessage("account.registration.confirmation.sms.content",
+        String message = this.messageSource.getMessage("account.registration.confirmation.token.content",
                 new Object[]{pendingAccountRegistration.getToken()}, locale);
 
-        this.message(pendingAccountRegistration.getPhoneNumber(), message);
+        //this.message(pendingAccountRegistration.getPhoneNumber(), message);
     }
 
     private void message(String to, String content) {
