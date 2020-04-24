@@ -8,6 +8,7 @@ import com.mssmfactory.covidrescuersbackend.dto.NotificationResponse;
 import com.mssmfactory.covidrescuersbackend.exceptions.NoSuchNotificationException;
 import com.mssmfactory.covidrescuersbackend.exceptions.NotYourNotificationException;
 import com.mssmfactory.covidrescuersbackend.repositories.NotificationRepository;
+import com.mssmfactory.covidrescuersbackend.utils.communication.FirebaseCloudMessagingHandler;
 import org.apache.logging.log4j.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -34,6 +35,9 @@ public class NotificationService {
 
     @Autowired
     private MessageSource messageSource;
+
+    @Autowired
+    private FirebaseCloudMessagingHandler firebaseCloudMessagingHandler;
 
     public void updateNotificationMark(Account account, Long notificationId, boolean marked) throws JsonProcessingException {
         Optional<Notification> notificationOptional = this.notificationRepository.findById(notificationId);
@@ -74,6 +78,8 @@ public class NotificationService {
     }
 
     private void notify(Account account, String messageKey, Notification.NotificationType notificationType) {
+        Locale locale = this.httpServletRequest.getLocale();
+
         Notification notification = new Notification();
         notification.setId(this.sequenceService.getNextValue(Notification.SEQUENCE_ID));
         notification.setAccountId(account.getId());
@@ -84,6 +90,7 @@ public class NotificationService {
 
         this.notificationRepository.save(notification);
         this.sequenceService.setNextValue(Notification.SEQUENCE_ID);
+        this.firebaseCloudMessagingHandler.sendToAccount(account, this.convertToNotificationResponse(notification, locale), locale);
     }
 
     // ---------------------------------------------------------------------------------------------------

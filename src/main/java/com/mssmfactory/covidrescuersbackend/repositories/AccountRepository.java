@@ -11,6 +11,10 @@ public interface AccountRepository extends MongoRepository<Account, Long> {
 
     Optional<Account> findByEmail(String email);
 
+    List<Account> findAllByCityId(Integer cityId);
+
+    Optional<Account> findByEmailAndCityId(String email, Integer cityId);
+
     Optional<Account> findByUsername(String username);
 
     Long countAllByAccountRole(Account.AccountRole accountRole);
@@ -23,5 +27,5 @@ public interface AccountRepository extends MongoRepository<Account, Long> {
 
     List<Account> findAllByEmailStartingWith(String phoneNumber);
 
-
+    List<Account> findAllByCityIdAndEmailStartingWith(Integer cityId, String email);
 }

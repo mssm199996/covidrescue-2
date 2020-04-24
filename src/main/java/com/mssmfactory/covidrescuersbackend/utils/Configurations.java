@@ -2,8 +2,8 @@ package com.mssmfactory.covidrescuersbackend.utils;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
-import com.mssmfactory.covidrescuersbackend.utils.deserialization.AccountStateSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mssmfactory.covidrescuersbackend.utils.serialization.AccountStateSerializer;
+import com.mssmfactory.covidrescuersbackend.utils.serialization.LocalDateTimeSerializer;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +22,7 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 @Configuration
@@ -41,7 +42,15 @@ public class Configurations implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE", "HEAD")
-                .allowedOrigins("http://localhost:8080", "http://localhost:8080/**")
+                .allowedOrigins(
+                        "http://localhost:8080", "http://localhost:8080/**",
+                        "https://localhost:8080", "https://localhost:8080/**",
+
+                        "http://localhost:8100", "http://localhost:8100/**",
+                        "https://localhost:8100", "https://localhost:8100/**",
+
+                        "http://covidrescue.app", "http://covidrescue.app/**",
+                        "https://covidrescue.app", "https://covidrescue.app/**")
                 .allowCredentials(true);
     }
 
@@ -74,6 +83,7 @@ public class Configurations implements WebMvcConfigurer {
     public SimpleModule customAccountDeserializer() {
         SimpleModule module = new SimpleModule();
         module.addSerializer(Account.AccountState.class, new AccountStateSerializer(this.messageSource()));
+        module.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer());
 
         return module;
     }

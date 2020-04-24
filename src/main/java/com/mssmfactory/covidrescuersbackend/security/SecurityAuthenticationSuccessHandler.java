@@ -3,6 +3,8 @@ package com.mssmfactory.covidrescuersbackend.security;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
+import jdk.jfr.ContentType;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -29,14 +31,16 @@ public class SecurityAuthenticationSuccessHandler implements AuthenticationSucce
             httpServletResponse.addHeader("Account", accountAsString);
 
             switch (account.getAccountRole()) {
-                case ADMIN:
-                    break;
                 case USER:
+                    httpServletResponse.setContentType(MediaType.APPLICATION_JSON.toString());
+                    httpServletResponse.getWriter().write(accountAsString);
                     break;
                 case DEV:
-                    httpServletResponse.sendRedirect("/swagger-ui.html");
+                    httpServletResponse.sendRedirect("swagger-ui.html");
                     break;
                 case API:
+                    break;
+                case OPEN_API:
                     break;
             }
         } catch (JsonProcessingException e) {

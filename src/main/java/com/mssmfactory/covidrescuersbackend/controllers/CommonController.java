@@ -1,5 +1,6 @@
 package com.mssmfactory.covidrescuersbackend.controllers;
 
+import lombok.Getter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -11,6 +12,6 @@ public class CommonController {
 
     @GetMapping("/")
     public void index(HttpServletResponse httpServletResponse) throws IOException {
-        httpServletResponse.sendRedirect("/login");
+        httpServletResponse.sendRedirect("login");
     }
 }

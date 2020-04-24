@@ -18,7 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     public static final String USER_ROLE = "USER_ROLE";
-    public static final String ADMIN_ROLE = "ADMIN_ROLE";
     public static final String DEV_ROLE = "DEV_ROLE";
     public static final String API_ROLE = "API_ROLE";
     public static final String OPEN_API_ROLE = "API_ROLE";
@@ -28,13 +27,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Value("${mssm.api.key.value}")
     private String apiKeyValue;
-    @Value("${mssm.api.role.value}")
-    private String apiRole;
 
     @Value("${mssm.open-api.key.value}")
     private String openApiKeyValue;
-    @Value("${mssm.open-api.role.value}")
-    private String openApiRole;
+
 
     @Value("${mssm.session.timeout}")
     private Integer sessionTimeout;
@@ -55,11 +51,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         ApiKeyFilter.API_PASSWORD = passwordEncoder.encode("covidrescruers-api-2020");
 
-        ApiKeyFilter apiKeyFilter = new ApiKeyFilter(this.apiKeyHeaderKey, this.apiKeyValue,
-                this.apiRole);
+        ApiKeyFilter apiKeyFilter = new ApiKeyFilter(this.apiKeyHeaderKey, this.apiKeyValue, WebSecurityConfig.API_ROLE);
 
-        http.cors()
-                .and()
+        http
                 .csrf()
                 .disable()
                 .exceptionHandling()
@@ -79,8 +73,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .and()
                 .logout()
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
+                .logoutSuccessUrl("/login")
                 .invalidateHttpSession(true)
 
                 // -----------------------------------------------------------------------------------------------------
@@ -104,34 +97,48 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers(
                         "/accountPosition/findAll",
+                        "/accountPosition/deleteAll",
+
+                        "/pendingAccountRegistration/deleteAll",
                         "/pendingAccountRegistration/findAll",
 
-                        "/account/deleteByPhoneNumber**")
+                        "/navigationPermission/deleteAll",
+                        "/navigationPermission/findAll",
+
+                        "/account/deleteAll",
+                        "/account/deleteByEmail**",
+
+                        "/applicationUpdate/deleteById/**")
                 .hasAuthority(WebSecurityConfig.DEV_ROLE)
+
+                .antMatchers(HttpMethod.POST,
+                        "/applicationUpdate")
+                .hasAnyAuthority(WebSecurityConfig.DEV_ROLE)
 
                 // -----------------------------------------------------------------------------------------------------
 
-                .antMatchers(
-                        "/account/findAll",
-                        "/account/findAllByEmailStartingWith**",
-                        "/account/findByEmail",
-                        "/account/updateAccountState/**",
-                        "/meeting/findDetailedMeetings/**")
+                .antMatchers("/town/updateTownDetails")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.ADMIN_ROLE,
                         WebSecurityConfig.API_ROLE
                 )
 
                 // -----------------------------------------------------------------------------------------------------
 
-                .antMatchers(HttpMethod.POST, "/meeting/")
+                .antMatchers(HttpMethod.POST,
+                        "/meeting",
+
+                        "/navigationPermission")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
                         WebSecurityConfig.USER_ROLE
                 )
 
-                .antMatchers("/meeting/findDetailedMeetingsByLoggedInAccount")
+                .antMatchers(
+                        "/meeting/findDetailedMeetingsByLoggedInAccount",
+
+                        "/navigationPermission/findCurrentByLoggedInAccount",
+                        "/navigationPermission/findAllByLoggedInAccount")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
                         WebSecurityConfig.USER_ROLE
@@ -139,7 +146,26 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // -----------------------------------------------------------------------------------------------------
 
+                .antMatchers(
+                        "/account/findAll",
+                        "/account/findAllByCityId**",
+
+                        "/account/findByEmail**",
+                        "/account/findAllByEmailStartingWith**",
+                        "/account/findAllByCityIdAndEmailStartingWith**",
+
+                        "/account/updateAccountState/**",
+
+                        "/meeting/findDetailedMeetings/**")
+                .hasAnyAuthority(
+                        WebSecurityConfig.DEV_ROLE,
+                        WebSecurityConfig.API_ROLE
+                )
+
+                // ------------------------------------------------------------------------------
+
                 .antMatchers("/notification/**",
+
                         "/account/findLoggedInAccount",
                         "/account/findStateByEmail",
                         "/account/updateLoggedInAccountPosition**",
@@ -147,7 +173,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/accountPosition/findAllByLoggedInAccount")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.ADMIN_ROLE,
                         WebSecurityConfig.API_ROLE,
                         WebSecurityConfig.USER_ROLE
                 )
@@ -155,7 +180,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/meeting")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.ADMIN_ROLE,
                         WebSecurityConfig.API_ROLE,
                         WebSecurityConfig.USER_ROLE
                 )
@@ -165,7 +189,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/analysis/**")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.ADMIN_ROLE,
                         WebSecurityConfig.API_ROLE,
                         WebSecurityConfig.OPEN_API_ROLE,
                         WebSecurityConfig.USER_ROLE
@@ -177,7 +200,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/meeting/countAllByAccountStateNearPosition")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.ADMIN_ROLE,
                         WebSecurityConfig.API_ROLE,
                         WebSecurityConfig.USER_ROLE,
                         WebSecurityConfig.OPEN_API_ROLE
@@ -185,12 +207,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // -----------------------------------------------------------------------------------------------------
 
-                .antMatchers("/swagger**", "/v2/api-docs**", "/swagger-resources/**", "/csrf").hasAuthority(WebSecurityConfig.DEV_ROLE)
+                .antMatchers("/swagger**", "/v2/api-docs**", "/csrf")
+                .hasAuthority(WebSecurityConfig.DEV_ROLE)
 
                 // -----------------------------------------------------------------------------------------------------
 
-                .antMatchers("/", "/city/findAll", "/town/findAll", "/webjars/**", "/account/isAccountAuthenticated")
-                .permitAll()
+                .antMatchers("/",
+                        "/city/findAll",
+                        "/town/findAll",
+                        "/town/findAllByCity/*",
+
+                        "/applicationUpdate/findByLastVersion",
+                        "/applicationUpdate/findAll",
+
+                        "/webjars/**",
+                        "/swagger-resources/**",
+
+                        "/account/isAccountAuthenticated"
+                ).permitAll()
 
                 .antMatchers(HttpMethod.POST, "/pendingAccountRegistration")
                 .permitAll()

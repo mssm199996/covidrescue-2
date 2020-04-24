@@ -12,8 +12,14 @@ public class NoSuchTownException extends AppRuntimeException {
     public NoSuchTownException(MessageSource messageSource, HttpServletRequest httpServletRequest,
                                ObjectMapper objectMapper, AccountRegistrationRequest accountRegistrationRequest) throws JsonProcessingException {
 
+        this(messageSource, httpServletRequest, objectMapper, accountRegistrationRequest.getTownId());
+    }
+
+    public NoSuchTownException(MessageSource messageSource, HttpServletRequest httpServletRequest,
+                               ObjectMapper objectMapper, Integer townId) throws JsonProcessingException {
+
         super(messageSource, httpServletRequest, objectMapper, "error.no-such-town.content",
-                new String[]{String.valueOf(accountRegistrationRequest.getTownId())},
+                new String[]{String.valueOf(townId)},
                 new String[]{"townId"});
     }
 }

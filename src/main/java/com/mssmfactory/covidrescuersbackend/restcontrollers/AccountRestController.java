@@ -27,9 +27,14 @@ public class AccountRestController {
         return this.accountRepository.findAll();
     }
 
-    @GetMapping("findAllByEmailStartingWith")
-    public List<Account> findAllByPhoneNumberStartingWith(@RequestParam("email") String email) {
-        return this.accountRepository.findAllByEmailStartingWith(email);
+    @GetMapping("findAllByCityId")
+    public List<Account> findAllByCityId(@RequestParam("cityId") Integer cityId) {
+        return this.accountRepository.findAllByCityId(cityId);
+    }
+
+    @GetMapping("findAllByCityIdAndEmailStartingWith")
+    public List<Account> findAllByPhoneNumberStartingWith(@RequestParam("cityId") Integer cityId, @RequestParam("email") String email) {
+        return this.accountRepository.findAllByCityIdAndEmailStartingWith(cityId, email);
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -45,7 +50,7 @@ public class AccountRestController {
     }
 
     @GetMapping("findByEmail")
-    public Account findByPhoneNumber(@RequestParam("email") String email) {
+    public Account findByEmail(@RequestParam("email") String email) {
         Optional<Account> accountOptional = this.accountRepository.findByEmail(email);
 
         if (accountOptional.isPresent())
@@ -85,6 +90,11 @@ public class AccountRestController {
 
     // ----------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------
+
+    @DeleteMapping("deleteAll")
+    public void deleteAll() {
+        this.accountRepository.deleteAll();
+    }
 
     @DeleteMapping("deleteByEmail")
     public void deleteByEmail(@RequestParam("email") String email) throws JsonProcessingException {

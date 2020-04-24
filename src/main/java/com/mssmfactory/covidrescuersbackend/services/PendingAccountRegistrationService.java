@@ -59,7 +59,7 @@ public class PendingAccountRegistrationService {
     @Autowired
     private MessageSource messageSource;
 
-    RandomStringGenerator tokensGenerator = new RandomStringGenerator.Builder()
+    private RandomStringGenerator tokensGenerator = new RandomStringGenerator.Builder()
             .withinRange('0', '9').build();
 
     public Account delete(String email, String token) throws JsonProcessingException {
@@ -86,7 +86,7 @@ public class PendingAccountRegistrationService {
 
         if (!duplicateAccount.isPresent()) {
             Locale locale = this.httpServletRequest.getLocale();
-            String token = this.tokensGenerator.generate(6);
+            String token = this.tokensGenerator.generate(4);
 
             Optional<PendingAccountRegistration> pendingAccountRegistrationOptional =
                     this.pendingAccountRegistrationRepository.findByEmail(

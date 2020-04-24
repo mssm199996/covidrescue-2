@@ -7,13 +7,11 @@ import com.mssmfactory.covidrescuersbackend.domainmodel.PendingAccountRegistrati
 import com.mssmfactory.covidrescuersbackend.dto.AccountRegistrationRequest;
 import com.mssmfactory.covidrescuersbackend.repositories.PendingAccountRegistrationRepository;
 import com.mssmfactory.covidrescuersbackend.services.PendingAccountRegistrationService;
-import com.twilio.rest.verify.v2.service.RateLimit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("pendingAccountRegistration")
@@ -46,5 +44,10 @@ public class PendingAccountRegistrationRestController {
         this.rateLimiter.acquire();
 
         return this.pendingAccountRegistrationService.delete(email, token);
+    }
+
+    @DeleteMapping("deleteAll")
+    public void deleteAll() {
+        this.pendingAccountRegistrationRepository.deleteAll();
     }
 }

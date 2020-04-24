@@ -3,10 +3,12 @@ package com.mssmfactory.covidrescuersbackend.restcontrollers;
 import com.mssmfactory.covidrescuersbackend.domainmodel.Account;
 import com.mssmfactory.covidrescuersbackend.domainmodel.AccountPosition;
 import com.mssmfactory.covidrescuersbackend.dto.AccountPositionResponse;
+import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
 import com.mssmfactory.covidrescuersbackend.services.AccountPositionService;
 import com.mssmfactory.covidrescuersbackend.services.AccountService;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +25,9 @@ public class AccountPositionRestController {
     @Autowired
     private AccountService accountService;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
     @GetMapping("findAll")
     public List<AccountPositionResponse> findAll() {
         return this.accountPositionService.findAll();
@@ -36,5 +41,10 @@ public class AccountPositionRestController {
             return this.accountPositionService.findAllByAccount(account);
 
         return null;
+    }
+
+    @DeleteMapping("deleteAll")
+    public void deleteAll() {
+        this.accountRepository.deleteAll();
     }
 }

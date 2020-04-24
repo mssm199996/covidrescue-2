@@ -33,6 +33,9 @@ public class Account implements UserDetails {
     @Indexed
     private Long id;
 
+    @Indexed
+    private String token;
+
     @NotNull
     private String firstName, famillyName, username;
 
@@ -121,9 +124,9 @@ public class Account implements UserDetails {
 
     @Getter
     public enum AccountRole {
-        ADMIN(WebSecurityConfig.ADMIN_ROLE),
         USER(WebSecurityConfig.USER_ROLE),
         API(WebSecurityConfig.API_ROLE),
+        OPEN_API(WebSecurityConfig.OPEN_API_ROLE),
         DEV(WebSecurityConfig.DEV_ROLE);
 
         private String name;

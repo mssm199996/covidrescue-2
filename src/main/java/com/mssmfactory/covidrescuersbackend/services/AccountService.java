@@ -9,6 +9,7 @@ import com.mssmfactory.covidrescuersbackend.exceptions.NoSuchAccountException;
 import com.mssmfactory.covidrescuersbackend.repositories.AccountPositionRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
 import com.mssmfactory.covidrescuersbackend.utils.SuspectionPropagationHandler;
+import com.mssmfactory.covidrescuersbackend.utils.factories.AccountFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class AccountService {
@@ -38,6 +40,9 @@ public class AccountService {
 
     @Autowired
     private SequenceService sequenceService;
+
+    @Autowired
+    private AccountFactory accountFactory;
 
     @Autowired
     private HttpServletRequest httpServletRequest;
@@ -68,26 +73,17 @@ public class AccountService {
 
     // -----------------------------------------------------------------------------------------------
 
-    public Account save(PendingAccountRegistration pendingAccountRegistration) {
-        Account account = new Account();
-        account.setEmail(pendingAccountRegistration.getEmail());
-        account.setUsername("User [" + pendingAccountRegistration.getEmail() + "]");
-        account.setId(this.sequenceService.getNextValue(Account.SEQUENCE_ID));
-        account.setFirstName(pendingAccountRegistration.getFirstName());
-        account.setFamillyName(pendingAccountRegistration.getFamillyName());
-        account.setAccountState(Account.AccountState.HEALTHY);
-        account.setNumberOfMeetings(0);
-
-        account.setPassword(pendingAccountRegistration.getPassword());
-        account.setAccountRole(Account.AccountRole.USER);
-
-        account.setCityId(pendingAccountRegistration.getCityId());
-        account.setTownId(pendingAccountRegistration.getTownId());
+    public Account save(PendingAccountRegistration pendingAccountRegistration, Account.AccountRole accountRole) {
+        Account account = this.accountFactory.save(pendingAccountRegistration, accountRole);
 
         this.accountRepository.save(account);
         this.sequenceService.setNextValue(Account.SEQUENCE_ID);
 
         return account;
+    }
+
+    public Account save(PendingAccountRegistration pendingAccountRegistration) {
+        return this.save(pendingAccountRegistration, Account.AccountRole.USER);
     }
 
     // -----------------------------------------------------------------------------------------------
