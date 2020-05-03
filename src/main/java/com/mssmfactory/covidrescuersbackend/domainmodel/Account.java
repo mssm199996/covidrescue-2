@@ -43,8 +43,8 @@ public class Account implements UserDetails {
     @JsonIgnore
     private String password;
 
-    @NotNull
     @Email
+    @NotNull
     @Indexed(unique = true)
     private String email;
 
@@ -55,6 +55,9 @@ public class Account implements UserDetails {
     @NotNull
     @Indexed
     private Integer cityId, townId;
+
+    @JsonIgnore
+    private Long currentEstablishmentId;
 
     @NotNull
     private Integer numberOfMeetings;
@@ -124,10 +127,13 @@ public class Account implements UserDetails {
 
     @Getter
     public enum AccountRole {
-        USER(WebSecurityConfig.USER_ROLE),
-        API(WebSecurityConfig.API_ROLE),
+        API(WebSecurityConfig.MEDICAL_ADMIN_API_ROLE),
         OPEN_API(WebSecurityConfig.OPEN_API_ROLE),
-        DEV(WebSecurityConfig.DEV_ROLE);
+
+        USER(WebSecurityConfig.USER_ROLE),
+        DEV(WebSecurityConfig.DEV_ROLE),
+
+        ESTABLISHMENT_ADMIN(WebSecurityConfig.ESTABLISHMENT_ADMIN_ROLE);
 
         private String name;
 

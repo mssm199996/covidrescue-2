@@ -8,7 +8,7 @@ import com.mssmfactory.covidrescuersbackend.domainmodel.PendingAccountRegistrati
 import com.mssmfactory.covidrescuersbackend.exceptions.NoSuchAccountException;
 import com.mssmfactory.covidrescuersbackend.repositories.AccountPositionRepository;
 import com.mssmfactory.covidrescuersbackend.repositories.AccountRepository;
-import com.mssmfactory.covidrescuersbackend.utils.SuspectionPropagationHandler;
+import com.mssmfactory.covidrescuersbackend.utils.propagation.MeetingPropagationHandler;
 import com.mssmfactory.covidrescuersbackend.utils.factories.AccountFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 @Service
 public class AccountService {
@@ -33,7 +32,7 @@ public class AccountService {
     private AccountPositionRepository accountPositionRepository;
 
     @Autowired
-    private SuspectionPropagationHandler suspectionPropagationHandler;
+    private MeetingPropagationHandler meetingPropagationHandler;
 
     @Autowired
     private NotificationService notificationService;
@@ -62,8 +61,6 @@ public class AccountService {
             try {
                 return Account.class.cast(principal);
             } catch (Exception e) {
-                e.printStackTrace();
-
                 return null;
             }
         }
@@ -140,12 +137,11 @@ public class AccountService {
     }
 
     public synchronized void propagateOnContaminated(Long contaminatedAccountId) {
-        Set<Long> accountsIdsToUpdate = this.suspectionPropagationHandler.propagate(contaminatedAccountId);
-        accountsIdsToUpdate.remove(contaminatedAccountId);
+        Set<Long> meetingAccountsIdsToUpdate = this.meetingPropagationHandler.propagate(contaminatedAccountId);
 
-        if (!accountsIdsToUpdate.isEmpty()) {
+        if (!meetingAccountsIdsToUpdate.isEmpty()) {
             Iterable<Account> accountsToUpdate = this.accountRepository.
-                    findAllByAccountStateAndIdIn(Account.AccountState.HEALTHY, accountsIdsToUpdate);
+                    findAllByAccountStateAndIdIn(Account.AccountState.HEALTHY, meetingAccountsIdsToUpdate);
 
             for (Account account : accountsToUpdate) {
                 account.setAccountState(Account.AccountState.SUSPECTED);

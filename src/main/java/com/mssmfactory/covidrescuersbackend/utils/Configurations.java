@@ -38,7 +38,7 @@ public class Configurations implements WebMvcConfigurer {
                 .build();
     }
 
-    @Override
+    /*@Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE", "HEAD")
@@ -52,7 +52,7 @@ public class Configurations implements WebMvcConfigurer {
                         "http://covidrescue.app", "http://covidrescue.app/**",
                         "https://covidrescue.app", "https://covidrescue.app/**")
                 .allowCredentials(true);
-    }
+    }*/
 
     @Bean
     public LocaleResolver localeResolver() {

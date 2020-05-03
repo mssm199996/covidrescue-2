@@ -1,4 +1,4 @@
-package com.mssmfactory.covidrescuersbackend.utils;
+package com.mssmfactory.covidrescuersbackend.utils.propagation;
 
 import com.mssmfactory.covidrescuersbackend.domainmodel.Meeting;
 import com.mssmfactory.covidrescuersbackend.repositories.MeetingRepository;
@@ -10,25 +10,15 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-public class SuspectionPropagationHandler {
+public class MeetingPropagationHandler implements IPropagationHandler {
 
     @Autowired
     private MeetingRepository meetingRepository;
 
     public Set<Long> propagate(Long parentAccountId) {
-        Set<Long> result = new HashSet<>();
+        Set<Long> accountsToUpdateIds = new HashSet<>();
 
-        /*this.propagate(parentAccountId, null, result, new HashSet<>());*/
-
-        this.propagate(parentAccountId, result);
-
-        return result;
-    }
-
-    private void propagate(Long parentAccountId, Set<Long> accountsToUpdateIds) {
-        List<Meeting> meetingList;
-
-        meetingList = this.meetingRepository.findByTriggererAccountIdOrTargetAccountId(parentAccountId,
+        List<Meeting> meetingList = this.meetingRepository.findByTriggererAccountIdOrTargetAccountId(parentAccountId,
                 parentAccountId);
 
         for (Meeting meeting : meetingList) {
@@ -39,6 +29,10 @@ public class SuspectionPropagationHandler {
             // Mark this account as treated
             accountsToUpdateIds.add(partnerId);
         }
+
+        accountsToUpdateIds.remove(parentAccountId);
+
+        return accountsToUpdateIds;
     }
 
     /*private void propagate(Long parentAccountId, Meeting parentToChildRelation, Set<Long> accountsToUpdateIds,

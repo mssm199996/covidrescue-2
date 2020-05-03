@@ -1,0 +1,96 @@
+ersion: "3.7"
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=mssm1996
+    volumes:
+      - type: volume
+        source: covidrescue-mongo-volume
+        target: /data/db
+    networks:
+      - covidrescue-main-backend-network
+    restart: always
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=8CNdKXmbYKMmg366
+      - POSTGRES_PASSWORD=HAgb77taq9ctg3dbr8GCnpFAYMj43DQT
+      - POSTGRES_DB=covidrescue
+    volumes:
+      - type: volume
+        source: covidrescue-postgres-volume
+        target: /var/lib/postgresql/data
+    networks:
+      - covidrescue-admin-backend-network
+    restart: always
+
+  covidrescue-main-backend:
+    build:
+      context: ./covidrescue_main_backend/
+      dockerfile: Dockerfile
+    image: covidrescue-main-backend
+    container_name: covidrescue-main-backend
+    ports:
+      - 8080:8080
+    environment:
+      - APPLICATION_CONTEXT_PATH=/covidrescue-main-backend
+      - MONGODB_HOSTNAME=mongo
+      - MONGODB_USERNAME=root
+      - MONGODB_PASSWORD=mssm1996
+      - MONGODB_PORT=27017
+      - MONGODB_DATABASE_NAME=covidrescue
+      - REFRESH_INITIAL_LOCATION_DATA=true
+      - FORCE_REFRESH_INITIAL_LOCATION_DATA=false
+      - DEV_ACCOUNT_EMAIL=covidrescue2020@gmail.com
+      - DEV_ACCOUNT_PASSWORD=covidrescue_developer@2020
+      - API_ROLE=ed4ea901b91e6a90b4db5a72b59042bdcdb04c361b09070ae9dc5a9a8f270923
+      - OPEN_API_ROLE=800a4e7fc840704e240836c2330ef443600f846a2e17086c13bb1d1e9179fdd2
+      - DEFAULT_NAVIGATION_PERMISSION_DURATION_SECONDS=7200
+      - DEFAULT_MAX_NUMBER_OF_ALLOWED_PERMISSIONS_AT_ONCE=100
+
+    networks:
+      - covidrescue-main-backend-network
+      - covidrescue-bridge-backend-network
+    restart: always
+
+  covidrescue-admin-backend:
+    build:
+      context: ./covidrescue_admin_backend/
+      dockerfile: Dockerfile
+    image: covidrescue-admin-backend
+    container_name: covidrescue-admin-backend
+    ports:
+      - 5000:5000
+    environment:
+      - CONTEXT=/
+      - PGDATABASE=covidrescue
+      - PGHOST=postgres
+      - PGUSER=8CNdKXmbYKMmg366
+      - PGPASSWORD=HAgb77taq9ctg3dbr8GCnpFAYMj43DQT
+      - PGPORT=5432
+      - COVID_DASHBOARD_JWT=nrLrJ0bBzrY1Sg9ZxQ99AYlROj86BMcYjXixnD5WWmPBGkoXBcpAznOizkN2npI
+      - COVID_API_KEY=ed4ea901b91e6a90b4db5a72b59042bdcdb04c361b09070ae9dc5a9a8f270923
+      - COVID_API_DOMAIN_URL=http://covidrescue-main-backend:8080
+    networks:
+      - covidrescue-admin-backend-network
+      - covidrescue-bridge-backend-network
+    restart: always
+
+networks:
+  covidrescue-main-backend-network:
+  covidrescue-admin-backend-network:
+  covidrescue-bridge-backend-network:
+
+volumes:
+  covidrescue-mongo-volume:
+  covidrescue-postgres-volume:

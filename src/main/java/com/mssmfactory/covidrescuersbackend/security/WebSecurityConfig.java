@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -12,6 +13,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, jsr250Enabled = true, securedEnabled = true)
@@ -19,8 +25,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     public static final String USER_ROLE = "USER_ROLE";
     public static final String DEV_ROLE = "DEV_ROLE";
-    public static final String API_ROLE = "API_ROLE";
+    public static final String MEDICAL_ADMIN_API_ROLE = "API_ROLE";
     public static final String OPEN_API_ROLE = "API_ROLE";
+    public static final String ESTABLISHMENT_ADMIN_ROLE = "ESTABLISHMENT_ADMIN";
 
     @Value("${mssm.api.key.header.key}")
     private String apiKeyHeaderKey;
@@ -51,11 +58,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         ApiKeyFilter.API_PASSWORD = passwordEncoder.encode("covidrescruers-api-2020");
 
-        ApiKeyFilter apiKeyFilter = new ApiKeyFilter(this.apiKeyHeaderKey, this.apiKeyValue, WebSecurityConfig.API_ROLE);
+        ApiKeyFilter apiKeyFilter = new ApiKeyFilter(this.apiKeyHeaderKey, this.apiKeyValue, WebSecurityConfig.MEDICAL_ADMIN_API_ROLE);
 
-        http
-                .csrf()
+        http.csrf()
                 .disable()
+                .cors()
+                .and()
                 .exceptionHandling()
                 // -----------------------------------------------------------------------------------------------------
 
@@ -94,6 +102,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticated()
 
                 // -----------------------------------------------------------------------------------------------------
+                // -----------------------------------------------------------------------------------------------------
+                // -----------------------------------------------------------------------------------------------------
+                // -----------------------------------------------------------------------------------------------------
+
+                .antMatchers(HttpMethod.POST,
+                        "/applicationUpdate")
+                .hasAnyAuthority(WebSecurityConfig.DEV_ROLE)
 
                 .antMatchers(
                         "/accountPosition/findAll",
@@ -108,43 +123,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/account/deleteAll",
                         "/account/deleteByEmail**",
 
+                        "/establishment/deleteAll",
+
+                        "/accountEstablishmentEvent/findAll",
+                        "/accountEstablishmentEvent/deleteAll",
+
                         "/applicationUpdate/deleteById/**")
                 .hasAuthority(WebSecurityConfig.DEV_ROLE)
-
-                .antMatchers(HttpMethod.POST,
-                        "/applicationUpdate")
-                .hasAnyAuthority(WebSecurityConfig.DEV_ROLE)
 
                 // -----------------------------------------------------------------------------------------------------
 
                 .antMatchers("/town/updateTownDetails")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.API_ROLE
+                        WebSecurityConfig.MEDICAL_ADMIN_API_ROLE
                 )
-
-                // -----------------------------------------------------------------------------------------------------
-
-                .antMatchers(HttpMethod.POST,
-                        "/meeting",
-
-                        "/navigationPermission")
-                .hasAnyAuthority(
-                        WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.USER_ROLE
-                )
-
-                .antMatchers(
-                        "/meeting/findDetailedMeetingsByLoggedInAccount",
-
-                        "/navigationPermission/findCurrentByLoggedInAccount",
-                        "/navigationPermission/findAllByLoggedInAccount")
-                .hasAnyAuthority(
-                        WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.USER_ROLE
-                )
-
-                // -----------------------------------------------------------------------------------------------------
 
                 .antMatchers(
                         "/account/findAll",
@@ -159,7 +152,47 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/meeting/findDetailedMeetings/**")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.API_ROLE
+                        WebSecurityConfig.MEDICAL_ADMIN_API_ROLE
+                )
+
+                // --------------------------------------------------------------------------------------------
+
+                .antMatchers(HttpMethod.POST,
+                        "/establishment")
+                .hasAnyAuthority(
+                        WebSecurityConfig.DEV_ROLE,
+                        WebSecurityConfig.ESTABLISHMENT_ADMIN_ROLE
+                )
+
+                .antMatchers(
+                        "/establishment/findAll",
+                        "/establishment/deleteByEmail**")
+                .hasAnyAuthority(
+                        WebSecurityConfig.DEV_ROLE,
+                        WebSecurityConfig.ESTABLISHMENT_ADMIN_ROLE
+                )
+
+                // -----------------------------------------------------------------------------------------------------
+
+                .antMatchers(HttpMethod.POST,
+                        "/meeting",
+                        "/navigationPermission",
+                        "/accountEstablishmentEvent")
+                .hasAnyAuthority(
+                        WebSecurityConfig.DEV_ROLE,
+                        WebSecurityConfig.USER_ROLE
+                )
+
+                .antMatchers(
+                        "/meeting/findDetailedMeetingsByLoggedInAccount",
+
+                        "/accountEstablishmentEvent/findAllByLoggedInAccount",
+
+                        "/navigationPermission/findCurrentByLoggedInAccount",
+                        "/navigationPermission/findAllByLoggedInAccount")
+                .hasAnyAuthority(
+                        WebSecurityConfig.DEV_ROLE,
+                        WebSecurityConfig.USER_ROLE
                 )
 
                 // ------------------------------------------------------------------------------
@@ -173,14 +206,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/accountPosition/findAllByLoggedInAccount")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.API_ROLE,
+                        WebSecurityConfig.MEDICAL_ADMIN_API_ROLE,
                         WebSecurityConfig.USER_ROLE
                 )
 
                 .antMatchers(HttpMethod.POST, "/meeting")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.API_ROLE,
+                        WebSecurityConfig.MEDICAL_ADMIN_API_ROLE,
                         WebSecurityConfig.USER_ROLE
                 )
 
@@ -189,9 +222,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/analysis/**")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.API_ROLE,
-                        WebSecurityConfig.OPEN_API_ROLE,
-                        WebSecurityConfig.USER_ROLE
+                        WebSecurityConfig.USER_ROLE,
+                        WebSecurityConfig.MEDICAL_ADMIN_API_ROLE,
+                        WebSecurityConfig.OPEN_API_ROLE
                 )
 
 
@@ -200,8 +233,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/meeting/countAllByAccountStateNearPosition")
                 .hasAnyAuthority(
                         WebSecurityConfig.DEV_ROLE,
-                        WebSecurityConfig.API_ROLE,
                         WebSecurityConfig.USER_ROLE,
+                        WebSecurityConfig.MEDICAL_ADMIN_API_ROLE,
                         WebSecurityConfig.OPEN_API_ROLE
                 )
 
@@ -231,9 +264,34 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers(HttpMethod.DELETE, "/pendingAccountRegistration")
                 .permitAll()
+
                 // -----------------------------------------------------------------------------------------------------
 
                 .anyRequest().denyAll();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "PUT", "DELETE", "HEAD"));
+        configuration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept"));
+        configuration.setMaxAge(Long.MAX_VALUE);
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:8080", "http://localhost:8080/**",
+                "https://localhost:8080", "https://localhost:8080/**",
+
+                "http://localhost:8100", "http://localhost:8100/**",
+                "https://localhost:8100", "https://localhost:8100/**",
+
+                "http://covidrescue.app", "http://covidrescue.app/**",
+                "https://covidrescue.app", "https://covidrescue.app/**"
+        ));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 
     @Override
